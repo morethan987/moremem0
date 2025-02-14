@@ -5,17 +5,6 @@ from mem0 import Memory
 # 加载 .env 文件
 load_dotenv()
 
-# 向量数据库
-qdrant_config = {
-    "provider": "qdrant",
-    "config": {
-        "collection_name": "test",
-        "host": "localhost",
-        "port": 6333,
-        "embedding_model_dims": 1024,  # Change this according to your local model's dimensions
-    },
-}
-
 # 语言模型
 deepseek_config = {
     "provider": "deepseek",
@@ -50,10 +39,35 @@ siliconflow_config = {
     },
 }
 
+# 向量数据库
+qdrant_config = {
+    "provider": "qdrant",
+    "config": {
+        "collection_name": "test",
+        "host": "localhost",
+        "port": 6333,
+        "embedding_model_dims": 1024,  # Change this according to your local model's dimensions
+    },
+}
+
+# 图数据库
+neo4j_config = {
+    "provider": "neo4j",
+    "config": {
+        "url": "neo4j://localhost:7687",
+        "username": "neo4j",
+        "password": "mo123456789"
+    },
+    # "llm": deepseek_config,
+}
+
+# 主配置
 config = {
     "vector_store": qdrant_config,
-    "llm": deepseek_config,
+    "graph_store": neo4j_config,
+    "llm": aliyun_config,
     "embedder": siliconflow_config,
+    "version": "v1.1",
 }
 
 # Initialize Memory with the configuration
@@ -67,6 +81,4 @@ messages = [
 # To use the latest output_format, set the output_format parameter to "v1.1"
 # m.add(messages, user_id="morethan", metadata={"food": "vegan"})
 
-# Retrieve memories
-memories = m.get_all(user_id="morethan")
-print(memories)
+m.add("I like pizza", user_id="morethan")
