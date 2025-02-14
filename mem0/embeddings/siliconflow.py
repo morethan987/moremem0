@@ -1,26 +1,24 @@
 import os
+import requests
 from typing import Optional
-
-from openai import OpenAI
 
 from mem0.configs.embeddings.base import BaseEmbedderConfig
 from mem0.embeddings.base import EmbeddingBase
 
 
-class OpenAIEmbedding(EmbeddingBase):
+class SiliconFlowEmbedding(EmbeddingBase):
     def __init__(self, config: Optional[BaseEmbedderConfig] = None):
         super().__init__(config)
 
-        self.config.model = self.config.model or "text-embedding-3-small"
-        self.config.embedding_dims = self.config.embedding_dims or 1536
+        self.config.model = self.config.model or "BAAI/bge-m3"
+        self.config.embedding_dims = self.config.embedding_dims or 1024
 
-        api_key = self.config.api_key or os.getenv("OPENAI_API_KEY")
-        base_url = self.config.openai_base_url or os.getenv("OPENAI_API_BASE")
-        self.client = OpenAI(api_key=api_key, base_url=base_url)
+        self.api_key = self.config.api_key or os.getenv("SILICONFLOW_API_KEY")
+        self.base_url = self.config.siliconflow_base_url or os.getenv("SILICONFLOW_API_BASE")
 
     def embed(self, text):
         """
-        Get the embedding for the given text using OpenAI.
+        Get the embedding for the given text using SiliconFlow.
 
         Args:
             text (str): The text to embed.
@@ -29,4 +27,13 @@ class OpenAIEmbedding(EmbeddingBase):
             list: The embedding vector.
         """
         text = text.replace("\n", " ")
-        return self.client.embeddings.create(input=[text], model=self.config.model).data[0].embedding
+        payload = {
+            "model": self.config.model,
+            "input": text,
+            "encoding_format": "float"
+        }
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
+        return requests.request("POST", self.base_url, json=payload, headers=headers).json()['data'][0]['embedding']

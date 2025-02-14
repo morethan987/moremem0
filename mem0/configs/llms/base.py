@@ -35,6 +35,10 @@ class BaseLlmConfig(ABC):
         http_client_proxies: Optional[Union[Dict, str]] = None,
         # DeepSeek specific
         deepseek_base_url: Optional[str] = None,
+        # DeepSeek specific
+        aliyun_base_url: Optional[str] = None,
+        # DeepSeek specific
+        zhipu_base_url: Optional[str] = None,
     ):
         """
         Initializes a configuration class instance for the LLM.
@@ -98,6 +102,12 @@ class BaseLlmConfig(ABC):
 
         # DeepSeek specific
         self.deepseek_base_url = deepseek_base_url
+
+        # Aliyun specific
+        self.aliyun_base_url = aliyun_base_url
+
+        # Zhipu specific
+        self.zhipu_base_url = zhipu_base_url
 
         # AzureOpenAI specific
         self.azure_kwargs = AzureConfig(**azure_kwargs) or {}

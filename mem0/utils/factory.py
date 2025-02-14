@@ -24,6 +24,8 @@ class LlmFactory:
         "azure_openai_structured": "mem0.llms.azure_openai_structured.AzureOpenAIStructuredLLM",
         "gemini": "mem0.llms.gemini.GeminiLLM",
         "deepseek": "mem0.llms.deepseek.DeepSeekLLM",
+        "aliyun": "mem0.llms.aliyun.AliyunLLM",
+        "zhipu": "mem0.llms.zhipu.ZhipuLLM"
     }
 
     @classmethod
@@ -46,6 +48,7 @@ class EmbedderFactory:
         "gemini": "mem0.embeddings.gemini.GoogleGenAIEmbedding",
         "vertexai": "mem0.embeddings.vertexai.VertexAIEmbedding",
         "together": "mem0.embeddings.together.TogetherEmbedding",
+        "siliconflow": "mem0.embeddings.siliconflow.SiliconFlowEmbedding"
     }
 
     @classmethod

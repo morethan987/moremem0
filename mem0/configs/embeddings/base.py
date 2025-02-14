@@ -20,6 +20,8 @@ class BaseEmbedderConfig(ABC):
         ollama_base_url: Optional[str] = None,
         # Openai specific
         openai_base_url: Optional[str] = None,
+        # SiliconFlow specific
+        siliconflow_base_url: Optional[str] = None,
         # Huggingface specific
         model_kwargs: Optional[dict] = None,
         # AzureOpenAI specific
@@ -59,6 +61,9 @@ class BaseEmbedderConfig(ABC):
 
         # Ollama specific
         self.ollama_base_url = ollama_base_url
+
+        # SiliconFlow specific
+        self.siliconflow_base_url = siliconflow_base_url
 
         # Huggingface specific
         self.model_kwargs = model_kwargs or {}
