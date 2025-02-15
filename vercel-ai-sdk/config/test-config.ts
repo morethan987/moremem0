@@ -14,39 +14,53 @@ export const testConfig = {
   userId: "mem0-ai-sdk-test-user-1134774",
   deleteId: "",
   providers: [
-    {
-      name: "openai",
-      activeModel: "gpt-4-turbo",
-      apiKey: process.env.OPENAI_API_KEY,
-    }
-    , 
-    {
-      name: "anthropic",
-      activeModel: "claude-3-5-sonnet-20240620",
-      apiKey: process.env.ANTHROPIC_API_KEY,
-    },
+    // {
+    //   name: "openai",
+    //   activeModel: "gpt-4-turbo",
+    //   apiKey: process.env.OPENAI_API_KEY,
+    // }
+    // , 
+    // {
+    //   name: "anthropic",
+    //   activeModel: "claude-3-5-sonnet-20240620",
+    //   apiKey: process.env.ANTHROPIC_API_KEY,
+    // },
     // {
     //   name: "groq",
     //   activeModel: "gemma2-9b-it",
     //   apiKey: process.env.GROQ_API_KEY,
     // },
+    // {
+    //   name: "cohere",
+    //   activeModel: "command-r-plus",
+    //   apiKey: process.env.COHERE_API_KEY,
+    // },
     {
-      name: "cohere",
-      activeModel: "command-r-plus",
-      apiKey: process.env.COHERE_API_KEY,
-    }
+      name: "deepseek",
+      activeModel: "deepseek-chat",
+      apiKey: process.env.DEEPSEEK_API_KEY,
+    },
+    {
+      name: "aliyun",
+      activeModel: "qwen-max-latest",
+      apiKey: process.env.ALIYUN_API_KEY,
+    },
   ],
   models: {
     openai: "gpt-4-turbo",
     anthropic: "claude-3-haiku-20240307",
     groq: "gemma2-9b-it",
-    cohere: "command-r-plus"
+    cohere: "command-r-plus",
+    deepseek: "deepseek-chat",
+    aliyun: "qwen-max-latest",
   },
   apiKeys: {
     openai: process.env.OPENAI_API_KEY,
     anthropic: process.env.ANTHROPIC_API_KEY,
     groq: process.env.GROQ_API_KEY,
     cohere: process.env.COHERE_API_KEY,
+    deepseek: process.env.DEEPSEEK_API_KEY,
+    aliyun: process.env.ALIYUN_API_KEY,
   },
 
   createTestClient: (provider: Provider) => {

@@ -59,8 +59,8 @@ export function createMem0(
     provider: "openai",
   },
 ): Mem0Provider {
-  const baseURL =
-    withoutTrailingSlash(options.baseURL) ?? 'http://127.0.0.1:11434/api'
+  // 去掉末尾的斜杠
+  const baseURL = withoutTrailingSlash(options.baseURL) ?? 'http://127.0.0.1:11434/api'
 
   const getHeaders = () => ({
     ...options.headers,
