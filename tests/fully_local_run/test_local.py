@@ -5,6 +5,10 @@ from mem0 import Memory
 # 加载 .env 文件
 load_dotenv()
 
+# 语言模型的API_KEY请统一填写在.env文件中，系统会自动读取；
+# 不要进行额外的手动输入，可能会导致API_KEY冲突
+# 系统内部的API_KEY使用的是一个统一的变量，因此手动输入可能会发生冲突
+
 # 语言模型
 deepseek_config = {
     "provider": "deepseek",
@@ -13,8 +17,7 @@ deepseek_config = {
         "temperature": 0.5,
         "top_p": 0.5,
         "max_tokens": 8000,
-        "ollama_base_url": "https://api.deepseek.com/v1",  # Ensure this URL is correct
-        "api_key": os.getenv('DEEPSEEK_API_KEY'),
+        "deepseek_base_url": "https://api.deepseek.com/v1",  # Ensure this URL is correct
     },
 }
 aliyun_config = {
@@ -24,8 +27,7 @@ aliyun_config = {
         "temperature": 0.5,
         "top_p": 0.5,
         "max_tokens": 8000,
-        "ollama_base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",  # Ensure this URL is correct
-        "api_key": os.getenv('ALIYUN_API_KEY'),
+        "aliyun_base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",  # Ensure this URL is correct
     },
 }
 
@@ -58,7 +60,7 @@ neo4j_config = {
         "username": "neo4j",
         "password": "mo123456789"
     },
-    # "llm": deepseek_config,
+    "llm": deepseek_config,
 }
 
 # 主配置
@@ -79,6 +81,6 @@ messages = [
 ]
 
 # To use the latest output_format, set the output_format parameter to "v1.1"
-# m.add(messages, user_id="morethan", metadata={"food": "vegan"})
+m.add(messages, user_id="morethan", metadata={"food": "vegan"})
 
-m.add("I like pizza", user_id="morethan")
+# m.add("I like pizza", user_id="morethan")

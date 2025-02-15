@@ -77,6 +77,10 @@ class BaseLlmConfig(ABC):
         :type http_client_proxies: Optional[Dict | str], optional
         :param deepseek_base_url: DeepSeek base URL to be use, defaults to None
         :type deepseek_base_url: Optional[str], optional
+        :param aliyun_base_url: Aliyun base URL to be use, defaults to None
+        :type aliyun_base_url: Optional[str], optional
+        :param zhipu_base_url: Zhipu base URL to be use, defaults to None
+        :type zhipu_base_url: Optional[str], optional
         """
 
         self.model = model
