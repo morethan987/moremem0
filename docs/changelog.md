@@ -11,6 +11,7 @@
 - 在.env.example中添加注释说明
 - 针对图数据库专用语言模型配置产生API_KEY冲突问题进行说明；见test_local.py中的注释说明
 - 解决graph_memory.py中图数据库存储专用模型与外部主配置模型冲突问题
+- 更改包名为`moremem0`并同步修改一些文件
 
 - 开发vercel-ai-sdk，接入新的模型供应商
 - 同步更新了测试配置文件`config/test-config.ts`和`example/index.ts`
