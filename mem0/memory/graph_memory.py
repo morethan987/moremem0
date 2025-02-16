@@ -48,7 +48,7 @@ class MemoryGraph:
         self.user_id = None
         self.threshold = 0.7
 
-    def add(self, data, filters):
+    def add(self, data, filters, graph_prompt=None):
         """
         Adds data to the graph.
 
@@ -57,7 +57,7 @@ class MemoryGraph:
             filters (dict): A dictionary containing filters to be applied during the addition.
         """
         entity_type_map = self._retrieve_nodes_from_data(data, filters)
-        to_be_added = self._establish_nodes_relations_from_data(data, filters, entity_type_map)
+        to_be_added = self._establish_nodes_relations_from_data(data, filters, entity_type_map, graph_prompt)
         search_output = self._search_graph_db(node_list=list(entity_type_map.keys()), filters=filters)
         to_be_deleted = self._get_delete_entities_from_search_output(search_output, data, filters)
 
@@ -150,7 +150,7 @@ class MemoryGraph:
     def _retrieve_nodes_from_data(self, data, filters):
         """Extracts all the entities mentioned in the query."""
         _tools = [EXTRACT_ENTITIES_TOOL]
-        if self.llm_provider in ["azure_openai_structured", "openai_structured"]:
+        if self.llm_provider in ["azure_openai_structured", "openai_structured", "aliyun"]:
             _tools = [EXTRACT_ENTITIES_STRUCT_TOOL]
         search_results = self.llm.generate_response(
             messages=[
@@ -175,14 +175,15 @@ class MemoryGraph:
         logger.debug(f"Entity type map: {entity_type_map}")
         return entity_type_map
 
-    def _establish_nodes_relations_from_data(self, data, filters, entity_type_map):
+    def _establish_nodes_relations_from_data(self, data, filters, entity_type_map, graph_prompt=None):
         """Eshtablish relations among the extracted nodes."""
-        if self.config.graph_store.custom_prompt:
+        custom_prompt = graph_prompt if graph_prompt else self.config.graph_store.custom_prompt
+        if custom_prompt:
             messages = [
                 {
                     "role": "system",
                     "content": EXTRACT_RELATIONS_PROMPT.replace("USER_ID", filters["user_id"]).replace(
-                        "CUSTOM_PROMPT", f"4. {self.config.graph_store.custom_prompt}"
+                        "CUSTOM_PROMPT", f"4. {custom_prompt}"
                     ),
                 },
                 {"role": "user", "content": data},

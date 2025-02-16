@@ -14,7 +14,7 @@ deepseek_config = {
     "provider": "deepseek",
     "config": {
         "model": "deepseek-chat",
-        "temperature": 0.5,
+        "temperature": 1.3,
         "top_p": 0.5,
         "max_tokens": 8000,
         "deepseek_base_url": "https://api.deepseek.com/v1",  # Ensure this URL is correct
@@ -24,7 +24,7 @@ aliyun_config = {
     "provider": "aliyun",
     "config": {
         "model": "qwen-max-latest",
-        "temperature": 0.5,
+        "temperature": 1.3,
         "top_p": 0.5,
         "max_tokens": 8000,
         "aliyun_base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",  # Ensure this URL is correct
@@ -85,5 +85,3 @@ m.add(initial_messages, user_id="morethan", metadata={"food": "fish"})
 
 memory = m.search("我喜欢吃什么？", user_id='morethan')
 print(memory)
-
-# {'results': [{'id': 'aae59bc3-00a1-4fce-8dcb-62a15130e958', 'memory': '非常喜欢吃鱼', 'hash': '682342f689b9ef8d7cc8b34644c6188a', 'metadata': {'food': 'fish'}, 'score': 0.766358, 'created_at': '2025-02-15T07:55:36.738502-08:00', 'updated_at': None, 'user_id': 'morethan'}], 'relations': []}

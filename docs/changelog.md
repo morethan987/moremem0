@@ -1,5 +1,13 @@
 # 更新日志
 
+## 2025-02-16
+
+### morethan987
+
+- 感谢原mem0的PR：#1998；全局自定义提示词可以被add方法中的局部提示词覆盖
+- 感谢原mem0的PR：#2179；改进了一些提示词和变量命名
+- 阿里云支持工具调用，在graph_memory.py/_retrieve_nodes_from_data中新增了aliyun
+
 ## 2025-02-15
 
 ### morethan987
