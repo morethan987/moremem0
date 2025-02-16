@@ -156,12 +156,13 @@ class MemoryGraph:
             messages=[
                 {
                     "role": "system",
-                    "content": f"You are a smart assistant who understands entities and their types in a given text. If user message contains self reference such as 'I', 'me', 'my' etc. then use {filters['user_id']} as the source entity. Extract all the entities from the text. ***DO NOT*** answer the question itself if the given text is a question.",
+                    "content": f"Identify all entities in the text. For any self-reference words like 'I', 'me', 'my', etc., replace them with {filters['user_id']}. Do not treat them as 'I' or 'me'—they should always be mapped to {filters['user_id']}. **Do not** answer questions directly, call the tool please.",
                 },
                 {"role": "user", "content": data},
             ],
             tools=_tools,
         )
+        print(search_results)
 
         entity_type_map = {}
 
