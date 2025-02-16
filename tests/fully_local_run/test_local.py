@@ -14,7 +14,7 @@ deepseek_config = {
     "provider": "deepseek",
     "config": {
         "model": "deepseek-chat",
-        "temperature": 1.3,
+        "temperature": 0.0, # 温度设为0.0，防止AI作妖
         "top_p": 0.5,
         "max_tokens": 8000,
         "deepseek_base_url": "https://api.deepseek.com/v1",  # Ensure this URL is correct
@@ -24,7 +24,7 @@ aliyun_config = {
     "provider": "aliyun",
     "config": {
         "model": "qwen-max-latest",
-        "temperature": 1.3,
+        "temperature": 0.0, # 温度设为0.0，防止AI作妖
         "top_p": 0.5,
         "max_tokens": 8000,
         "aliyun_base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",  # Ensure this URL is correct
@@ -80,8 +80,7 @@ initial_messages = [
     {"role": "assistant", "content": "你好呀，Morethan！很高兴认识你。吃鱼是个很棒的选择呢，鱼肉不仅鲜美，还富含优质蛋白质、不饱和脂肪酸，对身体有很多好处。你最喜欢吃什么鱼，或者用什么方式烹饪鱼呢？"}
 ]
 
-m.add(initial_messages, user_id="morethan", metadata={"food": "fish"})
+# print(m.add(initial_messages, user_id="morethan", metadata={"food": "fish"}))
 # m.add("I like pizza", user_id="morethan")
 
-memory = m.search("我喜欢吃什么？", user_id='morethan')
-print(memory)
+print(m.search("我喜欢吃什么？", user_id='morethan'))
