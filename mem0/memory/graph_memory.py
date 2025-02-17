@@ -3,6 +3,11 @@ import logging
 from mem0.memory.utils import format_entities
 
 try:
+    import MicroTokenizer
+except ImportError:
+    raise ImportError("MicroTokenizer is not installed. Please install it using pip install MicroTokenizer")
+
+try:
     from langchain_neo4j import Neo4jGraph
 except ImportError:
     raise ImportError("langchain_community is not installed. Please install it using pip install langchain-community")
@@ -91,9 +96,18 @@ class MemoryGraph:
         search_outputs_sequence = [
             [item["source"], item["relatationship"], item["destination"]] for item in search_output
         ]
+        logger.info(search_outputs_sequence)
         bm25 = BM25Okapi(search_outputs_sequence)
 
-        tokenized_query = query.split(" ")
+        tokenized_query = MicroTokenizer.cut(query) # 多语言切片
+
+        # 计算每个文档的 BM25 评分
+        scores = []
+        for i in range(len(search_outputs_sequence)):
+            score = bm25.get_scores(tokenized_query)
+            scores.append(score)
+            logger.info(f"BM25 Score for document {i}: {score}")
+
         reranked_results = bm25.get_top_n(tokenized_query, search_outputs_sequence, n=5)
 
         search_results = []
@@ -162,7 +176,6 @@ class MemoryGraph:
             ],
             tools=_tools,
         )
-        print(search_results)
 
         entity_type_map = {}
 
@@ -334,6 +347,7 @@ class MemoryGraph:
             destination_node_search_result = self._search_destination_node(dest_embedding, user_id, threshold=0.9)
 
             # TODO: Create a cypher query and common params for all the cases
+            # 如果目标节点不存在，但源节点存在
             if not destination_node_search_result and source_node_search_result:
                 cypher = f"""
                     MATCH (source)
@@ -359,6 +373,7 @@ class MemoryGraph:
                 resp = self.graph.query(cypher, params=params)
                 results.append(resp)
 
+            # 如果目标节点存在，但源节点不存在
             elif destination_node_search_result and not source_node_search_result:
                 cypher = f"""
                     MATCH (destination)
@@ -384,6 +399,7 @@ class MemoryGraph:
                 resp = self.graph.query(cypher, params=params)
                 results.append(resp)
 
+            # 如果源节点和目标节点都存在
             elif source_node_search_result and destination_node_search_result:
                 cypher = f"""
                     MATCH (source)
@@ -405,6 +421,7 @@ class MemoryGraph:
                 resp = self.graph.query(cypher, params=params)
                 results.append(resp)
 
+            # 如果源节点和目标节点都不存在
             elif not source_node_search_result and not destination_node_search_result:
                 cypher = f"""
                     MERGE (n:{source_type} {{name: $source_name, user_id: $user_id}})

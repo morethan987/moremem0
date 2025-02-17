@@ -129,6 +129,6 @@ test_messages = [
 
 # print(m.add(test_messages, user_id="morethan"))
 
-results = m.search("我刚刚说我要干什么？", user_id='morethan')
+results = m.search("What will I do next?", user_id='morethan')
 
 print(format_search_results(results))
