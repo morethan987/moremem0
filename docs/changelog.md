@@ -8,6 +8,7 @@
 - 解决结构化工具调用时json格式输出错误，原因是`graphs/tools.py/RELATIONS_STRUCT_TOOL`中的错误拼写
 - 新增`graphs/utils.py/EXTRACT_ENTITIES_PROMPT`，将原本在`mem0/memory/graph_memory.py`中的提示词统一管理
 - `mem0/memory/graph_memory.py`中新增`structured_output_provider`统一管理支持结构化输出的供应商
+- 原仓库更新#2216和#2219
 
 ## 2025-02-17
 
