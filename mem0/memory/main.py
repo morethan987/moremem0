@@ -160,14 +160,14 @@ class Memory(MemoryBase):
 
         try:
             response = remove_code_blocks(response)
-            new_generated_facts = json.loads(response)["facts"]
+            new_retrieved_facts = json.loads(response)["facts"]
         except Exception as e:
             logging.error(f"Error in new_retrieved_facts: {e}")
-            new_generated_facts = []
+            new_retrieved_facts = []
 
         retrieved_old_memory = []
         new_message_embeddings = {}
-        for new_mem in new_generated_facts:
+        for new_mem in new_retrieved_facts:
             messages_embeddings = self.embedding_model.embed(new_mem)
             new_message_embeddings[new_mem] = messages_embeddings
             existing_memories = self.vector_store.search(
@@ -178,6 +178,9 @@ class Memory(MemoryBase):
             for mem in existing_memories:
                 retrieved_old_memory.append({"id": mem.id, "text": mem.payload["data"]})
 
+        # remove same records
+        retrieved_old_memory = list({item["id"]: item for item in retrieved_old_memory}.values())
+
         logging.info(f"Total existing memories: {len(retrieved_old_memory)}")
 
         # mapping UUIDs with integers for handling UUID hallucinations
@@ -186,7 +189,7 @@ class Memory(MemoryBase):
             temp_uuid_mapping[str(idx)] = item["id"]
             retrieved_old_memory[idx]["id"] = str(idx)
 
-        function_calling_prompt = get_update_memory_messages(retrieved_old_memory, new_generated_facts)
+        function_calling_prompt = get_update_memory_messages(retrieved_old_memory, new_retrieved_facts)
 
         new_memories_with_actions = self.llm.generate_response(
             messages=[{"role": "user", "content": function_calling_prompt}],

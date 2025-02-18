@@ -127,8 +127,8 @@ test_messages = [
 # print(m.add(initial_messages, user_id="morethan", metadata={"food": "fish"}))
 # m.add("I like pizza", user_id="morethan")
 
-# print(m.add(test_messages, user_id="morethan"))
+print(m.add(test_messages, user_id="morethan"))
 
-results = m.search("What will I do next?", user_id='morethan')
+# results = m.search("What will I do next?", user_id='morethan')
 
-print(format_search_results(results))
+# print(format_search_results(results))
