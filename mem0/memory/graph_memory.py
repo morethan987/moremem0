@@ -25,7 +25,7 @@ from mem0.graphs.tools import (
     RELATIONS_STRUCT_TOOL,
     RELATIONS_TOOL,
 )
-from mem0.graphs.utils import EXTRACT_RELATIONS_PROMPT, get_delete_messages
+from mem0.graphs.utils import EXTRACT_ENTITIES_PROMPT, EXTRACT_RELATIONS_PROMPT, get_delete_messages
 from mem0.utils.factory import EmbedderFactory, LlmFactory
 
 logger = logging.getLogger(__name__)
@@ -52,6 +52,7 @@ class MemoryGraph:
         self.llm = LlmFactory.create(self.llm_provider, self.llm_config)
         self.user_id = None
         self.threshold = 0.7
+        self.structured_output_provider = ["azure_openai_structured", "openai_structured", "aliyun"]
 
     def add(self, data, filters, graph_prompt=None):
         """
@@ -164,13 +165,13 @@ class MemoryGraph:
     def _retrieve_nodes_from_data(self, data, filters):
         """Extracts all the entities mentioned in the query."""
         _tools = [EXTRACT_ENTITIES_TOOL]
-        if self.llm_provider in ["azure_openai_structured", "openai_structured", "aliyun"]:
+        if self.llm_provider in self.structured_output_provider:
             _tools = [EXTRACT_ENTITIES_STRUCT_TOOL]
         search_results = self.llm.generate_response(
             messages=[
                 {
                     "role": "system",
-                    "content": f"Identify all entities in the text. For any self-reference words like 'I', 'me', 'my', etc., replace them with {filters['user_id']}. Do not treat them as 'I' or 'me'—they should always be mapped to {filters['user_id']}. **Do not** answer questions directly, call the tool please.",
+                    "content": EXTRACT_ENTITIES_PROMPT.replace("USER_ID", filters["user_id"]),
                 },
                 {"role": "user", "content": data},
             ],
@@ -186,6 +187,7 @@ class MemoryGraph:
             logger.error(f"Error in search tool: {e}")
 
         entity_type_map = {k.lower().replace(" ", "_"): v.lower().replace(" ", "_") for k, v in entity_type_map.items()}
+        print(f"Entity type map: {entity_type_map}")
         logger.debug(f"Entity type map: {entity_type_map}")
         return entity_type_map
 
@@ -212,7 +214,7 @@ class MemoryGraph:
             ]
 
         _tools = [RELATIONS_TOOL]
-        if self.llm_provider in ["azure_openai_structured", "openai_structured"]:
+        if self.llm_provider in self.structured_output_provider:
             _tools = [RELATIONS_STRUCT_TOOL]
 
         extracted_entities = self.llm.generate_response(
@@ -276,7 +278,7 @@ class MemoryGraph:
         system_prompt, user_prompt = get_delete_messages(search_output_string, data, filters["user_id"])
 
         _tools = [DELETE_MEMORY_TOOL_GRAPH]
-        if self.llm_provider in ["azure_openai_structured", "openai_structured"]:
+        if self.llm_provider in self.structured_output_provider:
             _tools = [
                 DELETE_MEMORY_STRUCT_TOOL_GRAPH,
             ]

@@ -32,6 +32,10 @@ Output:
 Provide a list of update instructions, each specifying the source, target, and the new relationship to be set. Only include memories that require updates.
 """
 
+EXTRACT_ENTITIES_PROMPT = """
+Identify all entities in the text. For any self-reference words like 'I', 'me', 'my', etc., replace them with USER_ID. Do not treat them as 'I' or 'me'—they should always be mapped to USER_ID. **Do not** answer questions directly, call the tool please.
+"""
+
 EXTRACT_RELATIONS_PROMPT = """
 
 You are an advanced algorithm designed to extract structured information from text to construct knowledge graphs. Your goal is to capture comprehensive and accurate information. Follow these key principles:
@@ -50,7 +54,7 @@ Entity Consistency:
     - Ensure that relationships are coherent and logically align with the context of the message.
     - Maintain consistent naming for entities across the extracted data.
 
-Strive to construct a coherent and easily understandable knowledge graph by eshtablishing all the relationships among the entities and adherence to the user’s context.
+Strive to construct a coherent and easily understandable knowledge graph by eshtablishing all the relationships among the entities and adherence to the user's context.
 
 Adhere strictly to these guidelines to ensure high-quality knowledge graph extraction."""
 
