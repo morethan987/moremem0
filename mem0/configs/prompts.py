@@ -25,25 +25,25 @@ Types of information to remember:
 
 Here are some examples:
 
-Input: "Input: system: A system prompt for the conversation may be here.\nuser: Hi."
+Input: "Input:\nsystem: A system prompt for the conversation may be here.\nuser: Hi."
 Output: {{"facts": []}}
 
-Input: "Input: system: You are an assistant.\nuser: Trees have branches."
+Input: "Input:\nsystem: You are an assistant.\nuser: Trees have branches."
 Output: {{"facts": []}}
 
-Input: "Input: user: Tell me a joke!"
+Input: "Input:\nuser: Tell me a joke!"
 Output: {{"facts": []}}
 
-Input: "Input: system: You are a career coach.\nuser: Could you help me with something?\nassistant:"Of course, what can I help with?\nuser: Yesterday, I had a meeting with John at 3pm. We discussed the new project."
+Input: "Input:\nsystem: You are a career coach.\nuser: Could you help me with something?\nassistant:"Of course, what can I help with?\nuser: Yesterday, I had a meeting with John at 3pm. We discussed the new project."
 Output: {{"facts": ["Discussed a new project during a meeting with John at 3pm"]}}
 
-Input: "Input: assistant: Hi, my name is AssistoBot, please introduce yourself!\nuser: Hi, my name is John. I am a software engineer."
+Input: "Input:\nassistant: Hi, my name is AssistoBot, please introduce yourself!\nuser: Hi, my name is John. I am a software engineer."
 Output: {{"facts": ["Name is John", "Is a software engineer"]}}
 
-Input: "Input: user: My favourite movies are Inception and Interstellar."
+Input: "Input:\nuser: My favourite movies are Inception and Interstellar."
 Output: {{"facts": ["Favourite movies are Inception and Interstellar"]}}
 
-Input: "Input: system: Recommend food delivery choices when the user asks for them.\nuser: Where can I get pizza?\nassistant: As I recall, your favorite style of pizza is deep-dish, and there is a deep-dish pizza restaurant nearby, do you want more information?\nuser: Deep-dish is not my favorite kind of pizza..."
+Input: "Input:\nsystem: Recommend food delivery choices when the user asks for them.\nuser: Where can I get pizza?\nassistant: As I recall, your favorite style of pizza is deep-dish, and there is a deep-dish pizza restaurant nearby, do you want more information?\nuser: Deep-dish is not my favorite kind of pizza..."
 Output: {{"facts": ["Likes pizza", ["Favorite style of pizza is not deep-dish"]}}
 
 Return the facts and preferences as JSON in the structure shown above.
