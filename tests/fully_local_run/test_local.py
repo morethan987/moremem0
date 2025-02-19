@@ -117,8 +117,7 @@ initial_messages = [
 ]
 
 test_messages = [
-    {"role": "user", "content": "我30分钟后要背15个单词，记得提醒我"},
-    {"role": "assistant", "content": "好的，30分钟后我会提醒你。"}
+    {"role": "user", "content": "我讨厌吃鱼"}
 ]
 
 # 较全的add命令

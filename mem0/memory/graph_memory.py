@@ -65,14 +65,14 @@ class MemoryGraph:
         entity_type_map = self._retrieve_nodes_from_data(data, filters)
         to_be_added = self._establish_nodes_relations_from_data(data, filters, entity_type_map, graph_prompt)
         search_output = self._search_graph_db(node_list=list(entity_type_map.keys()), filters=filters)
-        to_be_deleted = self._get_delete_entities_from_search_output(search_output, data, filters)
+        to_be_deleted = self._get_delete_triples_from_search_output(search_output, data, filters)
 
         # TODO: Batch queries with APOC plugin
         # TODO: Add more filter support
-        deleted_entities = self._delete_entities(to_be_deleted, filters["user_id"])
-        added_entities = self._add_entities(to_be_added, filters["user_id"], entity_type_map)
+        deleted_relations = self._delete_relations(to_be_deleted, filters["user_id"])
+        added_triples = self._add_triples(to_be_added, filters["user_id"], entity_type_map)
 
-        return {"deleted_entities": deleted_entities, "added_entities": added_entities}
+        return {"deleted_relations": deleted_relations, "added_triples": added_triples}
 
     def search(self, query, filters, limit=100):
         """
@@ -187,7 +187,6 @@ class MemoryGraph:
             logger.error(f"Error in search tool: {e}")
 
         entity_type_map = {k.lower().replace(" ", "_"): v.lower().replace(" ", "_") for k, v in entity_type_map.items()}
-        print(f"Entity type map: {entity_type_map}")
         logger.debug(f"Entity type map: {entity_type_map}")
         return entity_type_map
 
@@ -217,19 +216,19 @@ class MemoryGraph:
         if self.llm_provider in self.structured_output_provider:
             _tools = [RELATIONS_STRUCT_TOOL]
 
-        extracted_entities = self.llm.generate_response(
+        extracted_triples = self.llm.generate_response(
             messages=messages,
             tools=_tools,
         )
 
-        if extracted_entities["tool_calls"]:
-            extracted_entities = extracted_entities["tool_calls"][0]["arguments"]["entities"]
+        if extracted_triples["tool_calls"]:
+            extracted_triples = extracted_triples["tool_calls"][0]["arguments"]["entities"]
         else:
-            extracted_entities = []
+            extracted_triples = []
 
-        extracted_entities = self._remove_spaces_from_entities(extracted_entities)
-        logger.debug(f"Extracted entities: {extracted_entities}")
-        return extracted_entities
+        extracted_triples = self._remove_spaces_from_entities(extracted_triples)
+        logger.debug(f"Extracted triples: {extracted_triples}")
+        return extracted_triples
 
     def _search_graph_db(self, node_list, filters, limit=100):
         """Search similar nodes among and their respective incoming and outgoing relations."""
@@ -272,7 +271,7 @@ class MemoryGraph:
 
         return result_relations
 
-    def _get_delete_entities_from_search_output(self, search_output, data, filters):
+    def _get_delete_triples_from_search_output(self, search_output, data, filters):
         """Get the entities to be deleted from the search output."""
         search_output_string = format_entities(search_output)
         system_prompt, user_prompt = get_delete_messages(search_output_string, data, filters["user_id"])
@@ -299,8 +298,8 @@ class MemoryGraph:
         logger.debug(f"Deleted relationships: {to_be_deleted}")
         return to_be_deleted
 
-    def _delete_entities(self, to_be_deleted, user_id):
-        """Delete the entities from the graph."""
+    def _delete_relations(self, to_be_deleted, user_id):
+        """Delete the outdated relations from the graph."""
         results = []
         for item in to_be_deleted:
             source = item["source"]
@@ -327,7 +326,7 @@ class MemoryGraph:
             results.append(result)
         return results
 
-    def _add_entities(self, to_be_added, user_id, entity_type_map):
+    def _add_triples(self, to_be_added, user_id, entity_type_map):
         """Add the new entities to the graph. Merge the nodes if they already exist."""
         results = []
         for item in to_be_added:
