@@ -88,7 +88,7 @@ class MemoryGraph:
                 - "contexts": List of search results from the base data store.
                 - "entities": List of related graph data based on the query.
         """
-        entity_type_map = self._retrieve_nodes_from_data(query, filters)
+        entity_type_map = self._retrieve_nodes_from_data(query, filters) # TODO 加一个includes/excludes过滤器？
         search_output = self._search_graph_db(node_list=list(entity_type_map.keys()), filters=filters)
 
         if not search_output:
@@ -234,7 +234,7 @@ class MemoryGraph:
 
     def _search_graph_db(self, node_list, filters, limit=100):
         """Search similar nodes among and their respective incoming and outgoing relations."""
-        result_relations = []
+        result_triples = []
 
         for node in node_list:
             n_embedding = self.embedding_model.embed(node)
@@ -269,9 +269,9 @@ class MemoryGraph:
                 "limit": limit,
             }
             ans = self.graph.query(cypher_query, params=params)
-            result_relations.extend(ans)
+            result_triples.extend(ans)
 
-        return result_relations
+        return result_triples
 
     def _get_delete_triples_from_search_output(self, search_output, data, filters):
         """Get the entities to be deleted from the search output."""

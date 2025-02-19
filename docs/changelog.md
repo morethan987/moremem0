@@ -10,6 +10,7 @@
 - 更新接口参数，使用`**kwargs`便于后续添加新参数
 - `add`方法中新增`includes`和`excludes`参数，用于调控AI提取的信息；并且向量数据库和图数据库的调控分开；语法详见`test_local.py`
 - 官方更新#2225：Webhook 支持（虽然我不知道这是什么意思🤔）
+- 更改`mem0\memory\graph_memory.py`中`_search_graph_db`函数的返回结果名称为`triples`
 
 ## 2025-02-18
 

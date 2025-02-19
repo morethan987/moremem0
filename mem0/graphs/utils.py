@@ -108,14 +108,7 @@ def get_delete_messages(existing_memories_string, data, user_id):
     ), f"Here are the existing memories: {existing_memories_string} \n\n New Information: {data}"
 
 def get_extract_entities_prompt(user_id, includes, excludes):
-    extract_entities_prompt = EXTRACT_ENTITIES_PROMPT.replace("{USER_ID}", user_id)
-    if includes and excludes:
-        extract_entities_prompt = EXTRACT_ENTITIES_PROMPT.replace("{INCLUDED_INFO}", includes).replace("{EXCLUDED_INFO}", excludes)
-    elif not includes and excludes:
-        extract_entities_prompt = EXTRACT_ENTITIES_PROMPT.replace("{INCLUDED_INFO}", "Except for those specifically to be excluded").replace("{EXCLUDED_INFO}", excludes)
-    elif includes and not excludes:
-        extract_entities_prompt = EXTRACT_ENTITIES_PROMPT.replace("{INCLUDED_INFO}", includes).replace("{EXCLUDED_INFO}", "None")
-    else:
-        extract_entities_prompt = EXTRACT_ENTITIES_PROMPT.replace("{INCLUDED_INFO}", "All").replace("{EXCLUDED_INFO}", "None")
-
-    return extract_entities_prompt
+    included_info = includes if includes else ("All" if not excludes else "Except for those specifically to be excluded")
+    excluded_info = excludes if excludes else "None"
+    
+    return EXTRACT_ENTITIES_PROMPT.replace("{USER_ID}", user_id).replace("{INCLUDED_INFO}", included_info).replace("{EXCLUDED_INFO}", excluded_info)
