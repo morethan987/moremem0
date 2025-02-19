@@ -25,7 +25,7 @@ from mem0.graphs.tools import (
     RELATIONS_STRUCT_TOOL,
     RELATIONS_TOOL,
 )
-from mem0.graphs.utils import EXTRACT_ENTITIES_PROMPT, EXTRACT_RELATIONS_PROMPT, get_delete_messages
+from mem0.graphs.utils import EXTRACT_RELATIONS_PROMPT, get_delete_messages, get_extract_entities_prompt
 from mem0.utils.factory import EmbedderFactory, LlmFactory
 
 logger = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ class MemoryGraph:
         self.threshold = 0.7
         self.structured_output_provider = ["azure_openai_structured", "openai_structured", "aliyun"]
 
-    def add(self, data, filters, graph_prompt=None):
+    def add(self, data, filters, graph_prompt=None, includes=None, excludes=None):
         """
         Adds data to the graph.
 
@@ -62,8 +62,8 @@ class MemoryGraph:
             data (str): The data to add to the graph.
             filters (dict): A dictionary containing filters to be applied during the addition.
         """
-        entity_type_map = self._retrieve_nodes_from_data(data, filters)
-        to_be_added = self._establish_nodes_relations_from_data(data, filters, entity_type_map, graph_prompt)
+        entity_type_map = self._retrieve_nodes_from_data(data, filters, includes, excludes)
+        to_be_added = self._establish_nodes_relations_from_data(data, filters, entity_type_map, graph_prompt) if entity_type_map else []
         search_output = self._search_graph_db(node_list=list(entity_type_map.keys()), filters=filters)
         to_be_deleted = self._get_delete_triples_from_search_output(search_output, data, filters)
 
@@ -97,7 +97,7 @@ class MemoryGraph:
         search_outputs_sequence = [
             [item["source"], item["relatationship"], item["destination"]] for item in search_output
         ]
-        logger.info(search_outputs_sequence)
+        # print(search_outputs_sequence)
         bm25 = BM25Okapi(search_outputs_sequence)
 
         tokenized_query = MicroTokenizer.cut(query) # 多语言切片
@@ -107,9 +107,11 @@ class MemoryGraph:
         for i in range(len(search_outputs_sequence)):
             score = bm25.get_scores(tokenized_query)
             scores.append(score)
-            logger.info(f"BM25 Score for document {i}: {score}")
+            # print(f"BM25 Score for document {i}: {score}")
 
         reranked_results = bm25.get_top_n(tokenized_query, search_outputs_sequence, n=5)
+        # BM25基于词频进行查询，在片段较少的情况下会排序失败
+        # 多语言的情况下也会失败
 
         search_results = []
         for item in reranked_results:
@@ -162,8 +164,8 @@ class MemoryGraph:
 
         return final_results
 
-    def _retrieve_nodes_from_data(self, data, filters):
-        """Extracts all the entities mentioned in the query."""
+    def _retrieve_nodes_from_data(self, data, filters, includes, excludes):
+        """Extracts the allowed entities mentioned in the query."""
         _tools = [EXTRACT_ENTITIES_TOOL]
         if self.llm_provider in self.structured_output_provider:
             _tools = [EXTRACT_ENTITIES_STRUCT_TOOL]
@@ -171,7 +173,7 @@ class MemoryGraph:
             messages=[
                 {
                     "role": "system",
-                    "content": EXTRACT_ENTITIES_PROMPT.replace("USER_ID", filters["user_id"]),
+                    "content": get_extract_entities_prompt(filters["user_id"], includes, excludes),
                 },
                 {"role": "user", "content": data},
             ],
@@ -197,8 +199,8 @@ class MemoryGraph:
             messages = [
                 {
                     "role": "system",
-                    "content": EXTRACT_RELATIONS_PROMPT.replace("USER_ID", filters["user_id"]).replace(
-                        "CUSTOM_PROMPT", f"4. {custom_prompt}"
+                    "content": EXTRACT_RELATIONS_PROMPT.replace("{USER_ID}", filters["user_id"]).replace(
+                        "{CUSTOM_PROMPT}", f"4. {custom_prompt}"
                     ),
                 },
                 {"role": "user", "content": data},
@@ -207,7 +209,7 @@ class MemoryGraph:
             messages = [
                 {
                     "role": "system",
-                    "content": EXTRACT_RELATIONS_PROMPT.replace("USER_ID", filters["user_id"]),
+                    "content": EXTRACT_RELATIONS_PROMPT.replace("{USER_ID}", filters["user_id"]),
                 },
                 {"role": "user", "content": f"List of entities: {list(entity_type_map.keys())}. \n\nText: {data}"},
             ]

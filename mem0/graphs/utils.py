@@ -33,7 +33,14 @@ Provide a list of update instructions, each specifying the source, target, and t
 """
 
 EXTRACT_ENTITIES_PROMPT = """
-Identify all entities in the text. For any self-reference words like 'I', 'me', 'my', etc., replace them with USER_ID. Do not treat them as 'I' or 'me'—they should always be mapped to USER_ID. **Do not** answer questions directly, call the tool please.
+**Identify** entities in the text related to the following topics:
+{INCLUDED_INFO}
+
+**Ignore** entities in the text related to the following topics:
+{EXCLUDED_INFO}
+
+- For any self-reference words like 'I', 'me', 'my', etc., replace them with {USER_ID}. Do not treat them as 'I' or 'me'—they should always be mapped to {USER_ID}. 
+- **Do not** answer questions directly, call the tool please.
 """
 
 EXTRACT_RELATIONS_PROMPT = """
@@ -42,8 +49,8 @@ You are an advanced algorithm designed to extract structured information from te
 
 1. Extract only explicitly stated information from the text.
 2. Establish relationships among the entities provided.
-3. Use "USER_ID" as the source entity for any self-references (e.g., "I," "me," "my," etc.) in user messages.
-CUSTOM_PROMPT
+3. Use "{USER_ID}" as the source entity for any self-references (e.g., "I," "me," "my," etc.) in user messages.
+{CUSTOM_PROMPT}
 
 Relationships:
     - Use consistent, general, and timeless relationship types.
@@ -99,3 +106,16 @@ def get_delete_messages(existing_memories_string, data, user_id):
     return DELETE_RELATIONS_SYSTEM_PROMPT.replace(
         "USER_ID", user_id
     ), f"Here are the existing memories: {existing_memories_string} \n\n New Information: {data}"
+
+def get_extract_entities_prompt(user_id, includes, excludes):
+    extract_entities_prompt = EXTRACT_ENTITIES_PROMPT.replace("{USER_ID}", user_id)
+    if includes and excludes:
+        extract_entities_prompt = EXTRACT_ENTITIES_PROMPT.replace("{INCLUDED_INFO}", includes).replace("{EXCLUDED_INFO}", excludes)
+    elif not includes and excludes:
+        extract_entities_prompt = EXTRACT_ENTITIES_PROMPT.replace("{INCLUDED_INFO}", "Except for those specifically to be excluded").replace("{EXCLUDED_INFO}", excludes)
+    elif includes and not excludes:
+        extract_entities_prompt = EXTRACT_ENTITIES_PROMPT.replace("{INCLUDED_INFO}", includes).replace("{EXCLUDED_INFO}", "None")
+    else:
+        extract_entities_prompt = EXTRACT_ENTITIES_PROMPT.replace("{INCLUDED_INFO}", "All").replace("{EXCLUDED_INFO}", "None")
+
+    return extract_entities_prompt

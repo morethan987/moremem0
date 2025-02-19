@@ -102,6 +102,13 @@ class Memory(MemoryBase):
             filters["agent_id"] = metadata["agent_id"] = kwargs.get("agent_id")
         if kwargs.get("run_id"):
             filters["run_id"] = metadata["run_id"] = kwargs.get("run_id")
+        
+        includes_dic = kwargs.get("includes") or {}
+        excludes_dic = kwargs.get("excludes") or {}
+
+        for dic in [includes_dic, excludes_dic]:
+            dic["vector"] = dic.get("vector")
+            dic["graph"] = dic.get("graph")
 
         if not any(key in filters for key in ("user_id", "agent_id", "run_id")):
             raise ValueError("One of the filters: user_id, agent_id or run_id is required!")
@@ -112,8 +119,9 @@ class Memory(MemoryBase):
         messages = parse_vision_messages(messages)
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            future1 = executor.submit(self._add_to_vector_store, messages, metadata, filters, prompt=kwargs.get("prompt"))
-            future2 = executor.submit(self._add_to_graph, messages, filters, graph_prompt=kwargs.get("graph_prompt"))
+            future1 = executor.submit(self._add_to_vector_store, messages, metadata, filters, prompt=kwargs.get("prompt"), includes=includes_dic["vector"], excludes=excludes_dic["vector"])
+            
+            future2 = executor.submit(self._add_to_graph, messages, filters, graph_prompt=kwargs.get("graph_prompt"), includes=includes_dic["graph"], excludes=excludes_dic["graph"])
 
             concurrent.futures.wait([future1, future2])
 
@@ -150,7 +158,7 @@ class Memory(MemoryBase):
 
         return {k: v for k, v in kwargs.items() if v is not None}
 
-    def _add_to_vector_store(self, messages, metadata, filters, prompt=None):
+    def _add_to_vector_store(self, messages, metadata, filters, prompt=None, includes=None, excludes=None):
         parsed_messages = parse_messages(messages)
 
         custom_prompt = prompt if prompt else self.custom_prompt
@@ -158,7 +166,7 @@ class Memory(MemoryBase):
             system_prompt = custom_prompt
             user_prompt = f"Input:\n{parsed_messages}"
         else:
-            system_prompt, user_prompt = get_fact_retrieval_messages(parsed_messages)
+            system_prompt, user_prompt = get_fact_retrieval_messages(parsed_messages, includes, excludes)
 
         response = self.llm.generate_response(
             messages=[
@@ -258,14 +266,14 @@ class Memory(MemoryBase):
 
         return returned_memories
 
-    def _add_to_graph(self, messages, filters, graph_prompt=None):
+    def _add_to_graph(self, messages, filters, graph_prompt=None, includes=None, excludes=None):
         added_entities = []
         if self.api_version == "v1.1" and self.enable_graph:
             if filters.get("user_id") is None:
                 filters["user_id"] = "user"
 
             data = "\n".join([msg["content"] for msg in messages if "content" in msg and msg["role"] != "system"])
-            added_entities = self.graph.add(data, filters, graph_prompt)
+            added_entities = self.graph.add(data, filters, graph_prompt, includes, excludes)
 
         return added_entities
 

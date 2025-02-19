@@ -116,17 +116,22 @@ initial_messages = [
     {"role": "assistant", "content": "你好呀，Morethan！很高兴认识你。吃鱼是个很棒的选择呢，鱼肉不仅鲜美，还富含优质蛋白质、不饱和脂肪酸，对身体有很多好处。你最喜欢吃什么鱼，或者用什么方式烹饪鱼呢？"}
 ]
 
+excluded_info = {
+    "vector": "1. 用户对于食物的偏好",
+    "graph": "1. 用户对于食物的偏好\n2. 用户的年龄"
+}
+
 test_messages = [
-    {"role": "user", "content": "我喜欢吃鱼"}
+    {"role": "user", "content": "我喜欢吃披萨，我今年12岁"}
 ]
 
 # 较全的add命令
-# m.add(initial_messages, user_id="morethan", prompt=add_prompt, graph_prompt=add_graph_prompt, metadata={"food": "fish"})
+# m.add(initial_messages, user_id="morethan", prompt=add_prompt, graph_prompt=add_graph_prompt, metadata={"food": "fish"}, , includes=included_info, excludes=excluded_info)
 
 # print(m.add(initial_messages, user_id="morethan", metadata={"food": "fish"}))
 # m.add("I like pizza", user_id="morethan")
 
-print(m.add(test_messages, user_id="morethan"))
+print(m.add(test_messages, user_id="morethan", excludes=excluded_info))
 
 # results = m.search("What will I do next?", user_id='morethan')
 
