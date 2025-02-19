@@ -117,7 +117,7 @@ initial_messages = [
 ]
 
 test_messages = [
-    {"role": "user", "content": "我讨厌吃鱼"}
+    {"role": "user", "content": "我喜欢吃鱼"}
 ]
 
 # 较全的add命令

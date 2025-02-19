@@ -5,7 +5,7 @@ import logging
 import uuid
 import warnings
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, Optional, List, Union
 
 import pytz
 from pydantic import ValidationError
@@ -62,29 +62,22 @@ class Memory(MemoryBase):
             raise
         return cls(config)
 
-    def add(
-        self,
-        messages,
-        user_id=None,
-        agent_id=None,
-        run_id=None,
-        metadata=None,
-        filters=None,
-        prompt=None,
-        graph_prompt=None,
-    ):
+    def add(self, messages: Union[str, List[Dict[str, str]]], **kwargs) -> Dict[str, Any]:
         """
         Adds, updates, or deletes memories as appropriate, based on the provided message(s).
 
         Args:
             messages (str or List[Dict[str, str]]): Messages to store in the memory.
-            user_id (str, optional): ID of the user creating the memory. Defaults to None.
-            agent_id (str, optional): ID of the agent creating the memory. Defaults to None.
-            run_id (str, optional): ID of the run creating the memory. Defaults to None.
-            metadata (dict, optional): Metadata to store with the memory. Defaults to None.
-            filters (dict, optional): Filters to apply to the search for pre-existing memories. Defaults to None.
-            prompt (str, optional): Prompt to use for memory deduction. Defaults to None.
-            graph_prompt (str, optional): Prompt to use for graph memory deduction. Defaults to None.
+            **kwargs: Additional parameters such as user_id, agent_id, app_id, metadata, filters.
+                user_id (str, optional): ID of the user creating the memory. Defaults to None.
+                agent_id (str, optional): ID of the agent creating the memory. Defaults to None.
+                run_id (str, optional): ID of the run creating the memory. Defaults to None.
+                metadata (dict, optional): Metadata to store with the memory. Defaults to None.
+                filters (dict, optional): Filters to apply to the search for pre-existing memories. Defaults to None.
+                prompt (str, optional): Prompt to use for memory deduction. Defaults to None.
+                graph_prompt (str, optional): Prompt to use for graph memory deduction. Defaults to None.
+                includes (str, optional): Prompt to include specified info. TODO
+                excludes (str, optional): Prompt to exclude specified info. TODO
 
         Returns:
             dict: A dictionary containing the result of the memory addition operation.
@@ -96,19 +89,19 @@ class Memory(MemoryBase):
                 'add': added memory
                 'update': updated memory
                 'delete': deleted memory
-
-
         """
-        if metadata is None:
+
+        kwargs = self._prepare_params(kwargs)
+        if kwargs.get("metadate") is None:
             metadata = {}
 
-        filters = filters or {}
-        if user_id:
-            filters["user_id"] = metadata["user_id"] = user_id
-        if agent_id:
-            filters["agent_id"] = metadata["agent_id"] = agent_id
-        if run_id:
-            filters["run_id"] = metadata["run_id"] = run_id
+        filters = kwargs.get("filters") or {}
+        if kwargs.get("user_id"):
+            filters["user_id"] = metadata["user_id"] = kwargs.get("user_id")
+        if kwargs.get("agent_id"):
+            filters["agent_id"] = metadata["agent_id"] = kwargs.get("agent_id")
+        if kwargs.get("run_id"):
+            filters["run_id"] = metadata["run_id"] = kwargs.get("run_id")
 
         if not any(key in filters for key in ("user_id", "agent_id", "run_id")):
             raise ValueError("One of the filters: user_id, agent_id or run_id is required!")
@@ -119,8 +112,8 @@ class Memory(MemoryBase):
         messages = parse_vision_messages(messages)
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            future1 = executor.submit(self._add_to_vector_store, messages, metadata, filters, prompt)
-            future2 = executor.submit(self._add_to_graph, messages, filters, graph_prompt)
+            future1 = executor.submit(self._add_to_vector_store, messages, metadata, filters, prompt=kwargs.get("prompt"))
+            future2 = executor.submit(self._add_to_graph, messages, filters, graph_prompt=kwargs.get("graph_prompt"))
 
             concurrent.futures.wait([future1, future2])
 
@@ -141,6 +134,21 @@ class Memory(MemoryBase):
                 stacklevel=2,
             )
             return vector_store_result
+        
+    def _prepare_params(self, kwargs: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Prepare query parameters.
+
+        Args:
+            kwargs: Keyword arguments to include in the parameters.
+
+        Returns:
+            A dictionary containing the prepared parameters.
+        """
+
+        if kwargs is None:
+            kwargs = {}
+
+        return {k: v for k, v in kwargs.items() if v is not None}
 
     def _add_to_vector_store(self, messages, metadata, filters, prompt=None):
         parsed_messages = parse_messages(messages)
@@ -305,20 +313,32 @@ class Memory(MemoryBase):
 
         return result
 
-    def get_all(self, user_id=None, agent_id=None, run_id=None, limit=100):
+    def get_all(self, **kwargs):
         """
         List all memories.
+
+        Parameters:
+        **kwargs:
+            user_id (str, optional)
+            agent_id (str, optional)
+            run_id (str, optional)
+            limit (int, optional)
 
         Returns:
             list: List of all memories.
         """
+        params = self._prepare_params(kwargs)
         filters = {}
-        if user_id:
-            filters["user_id"] = user_id
-        if agent_id:
-            filters["agent_id"] = agent_id
-        if run_id:
-            filters["run_id"] = run_id
+        if params.get("user_id"):
+            filters["user_id"] = params.get("user_id")
+        if params.get("agent_id"):
+            filters["agent_id"] = params.get("agent_id")
+        if params.get("run_id"):
+            filters["run_id"] = params.get("run_id")
+        if params.get("limit"):
+            limit = params.get("limit")
+        else:
+            limit = 100
 
         capture_event("mem0.get_all", self, {"limit": limit, "keys": list(filters.keys())})
 
@@ -384,28 +404,34 @@ class Memory(MemoryBase):
         ]
         return all_memories
 
-    def search(self, query, user_id=None, agent_id=None, run_id=None, limit=100, filters=None):
+    def search(self, query: str, **kwargs) -> List[Dict[str, Any]]:
         """
         Search for memories.
 
         Args:
             query (str): Query to search for.
-            user_id (str, optional): ID of the user to search for. Defaults to None.
-            agent_id (str, optional): ID of the agent to search for. Defaults to None.
-            run_id (str, optional): ID of the run to search for. Defaults to None.
-            limit (int, optional): Limit the number of results. Defaults to 100.
-            filters (dict, optional): Filters to apply to the search. Defaults to None.
+            **kwargs: 
+                user_id (str, optional): ID of the user to search for. Defaults to None.
+                agent_id (str, optional): ID of the agent to search for. Defaults to None.
+                run_id (str, optional): ID of the run to search for. Defaults to None.
+                limit (int, optional): Limit the number of results. Defaults to 100.
+                filters (dict, optional): Filters to apply to the search. Defaults to None.
 
         Returns:
             list: List of search results.
         """
-        filters = filters or {}
-        if user_id:
-            filters["user_id"] = user_id
-        if agent_id:
-            filters["agent_id"] = agent_id
-        if run_id:
-            filters["run_id"] = run_id
+        params = self._prepare_params(kwargs)
+        filters = kwargs.get("filters") or {}
+        if params.get("user_id"):
+            filters["user_id"] = params.get("user_id")
+        if params.get("agent_id"):
+            filters["agent_id"] = params.get("agent_id")
+        if params.get("run_id"):
+            filters["run_id"] = params.get("run_id")
+        if params.get("limit"):
+            limit = params.get("limit")
+        else:
+            limit = 100
 
         if not any(key in filters for key in ("user_id", "agent_id", "run_id")):
             raise ValueError("One of the filters: user_id, agent_id or run_id is required!")
