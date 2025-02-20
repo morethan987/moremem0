@@ -219,3 +219,66 @@ def get_update_memory_messages(retrieved_old_memory_dict, response_content):
 
     Do not return anything except JSON.
     """
+
+DEFAULT_CATEGORIES = """
+- personal_details: Information about the individual, such as name, age, and contact details.
+- family: Details regarding family members and relationships.
+- professional_details: Work-related information, including career, job title, and workplace.
+- sports: Involvement in physical activities, games, and fitness.
+- travel: Travel experiences, destinations, and trip preferences.
+- food: Preferences and experiences related to food, cooking, and dining.
+- music: Musical tastes, genres, artists, and listening habits.
+- health: Physical and mental health status, medical history, and wellness routines.
+- technology: Interest in tech, gadgets, software, and innovations.
+- hobbies: Recreational activities and interests pursued in free time.
+- fashion: Clothing, style preferences, and trends.
+- entertainment: Interests in movies, shows, books, and other media.
+- milestones: Important life events, achievements, and significant moments.
+- user_preferences: Individual preferences for various aspects of life, like routine, activities, and choices.
+- misc: Other miscellaneous information not covered by other categories.
+"""
+
+def get_create_categories_prompt(add_memories, custom_categories=None):
+    return f"""You are a classification expert with expertise in JSON format. You will receive one or more memory entries, and your task is to insert classification tags into them according to JSON syntax.
+
+Please choose classification tags **from the following list**. If necessary, you may insert multiple tags:
+
+{custom_categories if custom_categories else DEFAULT_CATEGORIES}
+
+- **Example**:
+Input:
+    {{
+        "memory": [
+            {{
+                "text": "Loves cheese pizza and chicken pizza",
+                "event": "ADD"
+            }},
+            {{
+                "text": "Loves to play cricket with friends",
+                "event": "ADD"
+            }}
+        ]
+    }}
+
+Expected output:
+    {{
+        "memory": [
+            {{
+                "text": "Loves cheese pizza and chicken pizza",
+                "event": "ADD",
+                "categories": ["food"]
+            }},
+            {{
+                "text": "Loves to play cricket with friends",
+                "event": "ADD",
+                "categories": ["sports", "hobbies"]
+            }}
+        ]
+    }}
+
+Now please begin your work:
+
+{add_memories}
+
+Attention: Do not return anything except JSON.
+"""

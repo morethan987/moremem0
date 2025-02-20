@@ -5,6 +5,7 @@ import threading
 
 class SQLiteManager:
     def __init__(self, db_path=":memory:"):
+        # 默认在内存中创建，程序结束后丢失
         self.connection = sqlite3.connect(db_path, check_same_thread=False)
         self._lock = threading.Lock()
         self._migrate_history_table()
@@ -33,6 +34,7 @@ class SQLiteManager:
                         "event": "TEXT",
                         "created_at": "DATETIME",
                         "updated_at": "DATETIME",
+                        "categories": "TEXT",
                         "is_deleted": "INTEGER",
                     }
 
@@ -52,6 +54,7 @@ class SQLiteManager:
                                 event TEXT,
                                 created_at DATETIME,
                                 updated_at DATETIME,
+                                categories TEXT,
                                 is_deleted INTEGER
                             )
                         """
@@ -61,7 +64,7 @@ class SQLiteManager:
                         cursor.execute(
                             """
                             INSERT INTO history (id, memory_id, old_memory, new_memory, new_value, event, created_at, updated_at, is_deleted)
-                            SELECT id, memory_id, prev_value, new_value, new_value, event, timestamp, timestamp, is_deleted
+                            SELECT id, memory_id, old_memory, new_memory, new_value, event, created_at, updated_at, NULL, is_deleted
                             FROM old_history
                         """  # noqa: E501
                         )
@@ -84,6 +87,7 @@ class SQLiteManager:
                         event TEXT,
                         created_at DATETIME,
                         updated_at DATETIME,
+                        categories TEXT,
                         is_deleted INTEGER
                     )
                 """
@@ -94,6 +98,7 @@ class SQLiteManager:
         memory_id,
         old_memory,
         new_memory,
+        categories,
         event,
         created_at=None,
         updated_at=None,
@@ -103,14 +108,15 @@ class SQLiteManager:
             with self.connection:
                 self.connection.execute(
                     """
-                    INSERT INTO history (id, memory_id, old_memory, new_memory, event, created_at, updated_at, is_deleted)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO history (id, memory_id, old_memory, new_memory, categories, event, created_at, updated_at, is_deleted)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                     (
                         str(uuid.uuid4()),
                         memory_id,
                         old_memory,
                         new_memory,
+                        ",".join(categories) if categories else None,  # 将列表转换为逗号分隔的字符串
                         event,
                         created_at,
                         updated_at,
@@ -122,7 +128,7 @@ class SQLiteManager:
         with self._lock:
             cursor = self.connection.execute(
                 """
-                SELECT id, memory_id, old_memory, new_memory, event, created_at, updated_at
+                SELECT id, memory_id, old_memory, new_memory, categories, event, created_at, updated_at
                 FROM history
                 WHERE memory_id = ?
                 ORDER BY updated_at ASC
@@ -136,9 +142,10 @@ class SQLiteManager:
                     "memory_id": row[1],
                     "old_memory": row[2],
                     "new_memory": row[3],
-                    "event": row[4],
-                    "created_at": row[5],
-                    "updated_at": row[6],
+                    "categories": row[4].split(",") if row[4] else [],  # 将字符串转回列表
+                    "event": row[5],
+                    "created_at": row[6],
+                    "updated_at": row[7],
                 }
                 for row in rows
             ]

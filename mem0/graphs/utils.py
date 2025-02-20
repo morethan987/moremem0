@@ -1,3 +1,5 @@
+from mem0.configs.prompts import DEFAULT_CATEGORIES
+
 UPDATE_GRAPH_PROMPT = """
 You are an AI expert specializing in graph memory management and optimization. Your task is to analyze existing graph memories alongside new information, and update the relationships in the memory list to ensure the most accurate, current, and coherent representation of knowledge.
 
@@ -39,8 +41,13 @@ EXTRACT_ENTITIES_PROMPT = """
 **Ignore** entities in the text related to the following topics:
 {EXCLUDED_INFO}
 
-- For any self-reference words like 'I', 'me', 'my', etc., replace them with {USER_ID}. Do not treat them as 'I' or 'me'—they should always be mapped to {USER_ID}. 
-- **Do not** answer questions directly, call the tool please.
+Please choose ONE most relevant type of the entity **from the following list**:
+{CATEGORIES}
+
+- For any self-reference words like 'I', 'me', 'my', etc., replace them with {USER_ID}. Do not treat them as 'I' or 'me'—they should always be mapped to {USER_ID}.
+- If the only entity is 'I', 'me', 'my', etc., treat the entity as {USER_ID}.
+- If the user input is a question, **do not** answer questions directly.
+- Just call the tool please.
 """
 
 EXTRACT_RELATIONS_PROMPT = """
@@ -107,8 +114,8 @@ def get_delete_messages(existing_memories_string, data, user_id):
         "USER_ID", user_id
     ), f"Here are the existing memories: {existing_memories_string} \n\n New Information: {data}"
 
-def get_extract_entities_prompt(user_id, includes, excludes):
+def get_extract_entities_prompt(user_id, includes=None, excludes=None, custom_categories=None):
     included_info = includes if includes else ("All" if not excludes else "Except for those specifically to be excluded")
     excluded_info = excludes if excludes else "None"
     
-    return EXTRACT_ENTITIES_PROMPT.replace("{USER_ID}", user_id).replace("{INCLUDED_INFO}", included_info).replace("{EXCLUDED_INFO}", excluded_info)
+    return EXTRACT_ENTITIES_PROMPT.replace("{USER_ID}", user_id).replace("{INCLUDED_INFO}", included_info).replace("{EXCLUDED_INFO}", excluded_info).replace("{CATEGORIES}", custom_categories if custom_categories else DEFAULT_CATEGORIES) # TODO 这里不能直接用类别，因为实体的分类的偏好的分类不一致

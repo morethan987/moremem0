@@ -54,7 +54,7 @@ class MemoryGraph:
         self.threshold = 0.7
         self.structured_output_provider = ["azure_openai_structured", "openai_structured", "aliyun"]
 
-    def add(self, data, filters, graph_prompt=None, includes=None, excludes=None):
+    def add(self, data, filters, custom_categories=None, graph_prompt=None, includes=None, excludes=None):
         """
         Adds data to the graph.
 
@@ -62,7 +62,7 @@ class MemoryGraph:
             data (str): The data to add to the graph.
             filters (dict): A dictionary containing filters to be applied during the addition.
         """
-        entity_type_map = self._retrieve_nodes_from_data(data, filters, includes, excludes)
+        entity_type_map = self._retrieve_nodes_from_data(data=data, filters=filters, includes=includes, excludes=excludes, custom_categories=custom_categories)
         to_be_added = self._establish_nodes_relations_from_data(data, filters, entity_type_map, graph_prompt) if entity_type_map else []
         search_output = self._search_graph_db(node_list=list(entity_type_map.keys()), filters=filters)
         to_be_deleted = self._get_delete_triples_from_search_output(search_output, data, filters)
@@ -88,7 +88,7 @@ class MemoryGraph:
                 - "contexts": List of search results from the base data store.
                 - "entities": List of related graph data based on the query.
         """
-        entity_type_map = self._retrieve_nodes_from_data(query, filters) # TODO 加一个includes/excludes过滤器？
+        entity_type_map = self._retrieve_nodes_from_data(data=query, filters=filters, includes=None, excludes=None) # TODO 加一个includes/excludes过滤器？
         search_output = self._search_graph_db(node_list=list(entity_type_map.keys()), filters=filters)
 
         if not search_output:
@@ -164,7 +164,7 @@ class MemoryGraph:
 
         return final_results
 
-    def _retrieve_nodes_from_data(self, data, filters, includes, excludes):
+    def _retrieve_nodes_from_data(self, data, filters, is_search=False, includes=None, excludes=None, custom_categories=None):
         """Extracts the allowed entities mentioned in the query."""
         _tools = [EXTRACT_ENTITIES_TOOL]
         if self.llm_provider in self.structured_output_provider:
@@ -173,7 +173,7 @@ class MemoryGraph:
             messages=[
                 {
                     "role": "system",
-                    "content": get_extract_entities_prompt(filters["user_id"], includes, excludes),
+                    "content": get_extract_entities_prompt(user_id=filters["user_id"], includes=includes, excludes=excludes, custom_categories=custom_categories),
                 },
                 {"role": "user", "content": data},
             ],

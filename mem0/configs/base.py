@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 
 from pydantic import BaseModel, Field
 
@@ -21,6 +21,7 @@ class MemoryItem(BaseModel):
     score: Optional[float] = Field(None, description="The score associated with the text data")
     created_at: Optional[str] = Field(None, description="The timestamp when the memory was created")
     updated_at: Optional[str] = Field(None, description="The timestamp when the memory was updated")
+    categories: List[str] = Field([], description="The relative categories of the memory")
 
 
 class MemoryConfig(BaseModel):

@@ -11,7 +11,7 @@ import pytz
 from pydantic import ValidationError
 from mem0.memory.utils import parse_vision_messages
 from mem0.configs.base import MemoryConfig, MemoryItem
-from mem0.configs.prompts import get_update_memory_messages
+from mem0.configs.prompts import get_update_memory_messages, get_create_categories_prompt
 from mem0.memory.base import MemoryBase
 from mem0.memory.setup import setup_config
 from mem0.memory.storage import SQLiteManager
@@ -105,10 +105,14 @@ class Memory(MemoryBase):
         
         includes_dic = kwargs.get("includes") or {}
         excludes_dic = kwargs.get("excludes") or {}
-
         for dic in [includes_dic, excludes_dic]:
             dic["vector"] = dic.get("vector")
             dic["graph"] = dic.get("graph")
+
+        # 解析custom_categories
+        custom_categories = kwargs.get("custom_categories")
+        if custom_categories:
+            custom_categories = "\n".join([f"- {key}: {value}" for category in custom_categories for key, value in category.items()])
 
         if not any(key in filters for key in ("user_id", "agent_id", "run_id")):
             raise ValueError("One of the filters: user_id, agent_id or run_id is required!")
@@ -119,9 +123,9 @@ class Memory(MemoryBase):
         messages = parse_vision_messages(messages)
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            future1 = executor.submit(self._add_to_vector_store, messages, metadata, filters, prompt=kwargs.get("prompt"), includes=includes_dic["vector"], excludes=excludes_dic["vector"])
+            future1 = executor.submit(self._add_to_vector_store, messages, metadata, filters, custom_categories=None, prompt=kwargs.get("prompt"), includes=includes_dic["vector"], excludes=excludes_dic["vector"])
             
-            future2 = executor.submit(self._add_to_graph, messages, filters, graph_prompt=kwargs.get("graph_prompt"), includes=includes_dic["graph"], excludes=excludes_dic["graph"])
+            future2 = executor.submit(self._add_to_graph, messages, filters, custom_categories=None, graph_prompt=kwargs.get("graph_prompt"), includes=includes_dic["graph"], excludes=excludes_dic["graph"])
 
             concurrent.futures.wait([future1, future2])
 
@@ -158,7 +162,7 @@ class Memory(MemoryBase):
 
         return {k: v for k, v in kwargs.items() if v is not None}
 
-    def _add_to_vector_store(self, messages, metadata, filters, prompt=None, includes=None, excludes=None):
+    def _add_to_vector_store(self, messages, metadata, filters, custom_categories=None, prompt=None, includes=None, excludes=None):
         parsed_messages = parse_messages(messages)
 
         custom_prompt = prompt if prompt else self.custom_prompt
@@ -208,14 +212,37 @@ class Memory(MemoryBase):
             retrieved_old_memory[idx]["id"] = str(idx)
 
         function_calling_prompt = get_update_memory_messages(retrieved_old_memory, new_retrieved_facts)
-
         new_memories_with_actions = self.llm.generate_response(
             messages=[{"role": "user", "content": function_calling_prompt}],
             response_format={"type": "json_object"},
         )
 
+        # 从原始响应中解析出记忆
         new_memories_with_actions = remove_code_blocks(new_memories_with_actions)
         new_memories_with_actions = json.loads(new_memories_with_actions)
+        
+        # 过滤出ADD类型的记忆
+        add_memories = [mem for mem in new_memories_with_actions["memory"] if mem["event"] == "ADD"]
+        
+        if add_memories:
+            # 只对ADD类型记忆生成categories标签
+            categories_generating_prompt = get_create_categories_prompt({"memory": add_memories}, custom_categories)
+            memories_with_categories = self.llm.generate_response(
+                messages=[{"role": "user", "content": categories_generating_prompt}],
+                response_format={"type": "json_object"},
+            )
+            memories_with_categories = remove_code_blocks(memories_with_categories)
+            memories_with_categories = json.loads(memories_with_categories)
+            
+            # 将categories合并回原始记忆中
+            add_memories_dict = {mem["text"]: mem for mem in add_memories}
+            for mem in memories_with_categories["memory"]:
+                if mem["text"] in add_memories_dict:
+                    add_memories_dict[mem["text"]]["categories"] = mem.get("categories", "")
+            
+            # 将非ADD类型记忆添加回结果中
+            non_add_memories = [mem for mem in new_memories_with_actions["memory"] if mem["event"] != "ADD"]
+            new_memories_with_actions["memory"] = add_memories + non_add_memories
 
         returned_memories = []
         try:
@@ -224,13 +251,14 @@ class Memory(MemoryBase):
                 try:
                     if resp["event"] == "ADD":
                         memory_id = self._create_memory(
-                            data=resp["text"], existing_embeddings=new_message_embeddings, metadata=metadata
+                            data=resp["text"], existing_embeddings=new_message_embeddings, metadata=metadata, categories=resp["categories"]
                         )
                         returned_memories.append(
                             {
                                 "id": memory_id,
                                 "memory": resp["text"],
                                 "event": resp["event"],
+                                "categories": resp["categories"],
                             }
                         )
                     elif resp["event"] == "UPDATE":
@@ -266,14 +294,14 @@ class Memory(MemoryBase):
 
         return returned_memories
 
-    def _add_to_graph(self, messages, filters, graph_prompt=None, includes=None, excludes=None):
+    def _add_to_graph(self, messages, filters, custom_categories, graph_prompt=None, includes=None, excludes=None):
         added_entities = []
         if self.api_version == "v1.1" and self.enable_graph:
             if filters.get("user_id") is None:
                 filters["user_id"] = "user"
 
             data = "\n".join([msg["content"] for msg in messages if "content" in msg and msg["role"] != "system"])
-            added_entities = self.graph.add(data, filters, graph_prompt, includes, excludes)
+            added_entities = self.graph.add(data, filters, custom_categories, graph_prompt, includes, excludes)
 
         return added_entities
 
@@ -492,6 +520,7 @@ class Memory(MemoryBase):
             "data",
             "created_at",
             "updated_at",
+            "categories"
         }
 
         original_memories = [
@@ -502,7 +531,8 @@ class Memory(MemoryBase):
                     hash=mem.payload.get("hash"),
                     created_at=mem.payload.get("created_at"),
                     updated_at=mem.payload.get("updated_at"),
-                    score=mem.score,
+                    score=mem.score, 
+                    categories=mem.payload.get("categories"),
                 ).model_dump(),
                 **{key: mem.payload[key] for key in ["user_id", "agent_id", "run_id"] if key in mem.payload},
                 **(
@@ -592,7 +622,7 @@ class Memory(MemoryBase):
         capture_event("mem0.history", self, {"memory_id": memory_id})
         return self.db.get_history(memory_id)
 
-    def _create_memory(self, data, existing_embeddings, metadata=None):
+    def _create_memory(self, data, existing_embeddings, categories, metadata=None):
         logging.info(f"Creating memory with {data=}")
         if data in existing_embeddings:
             embeddings = existing_embeddings[data]
@@ -603,13 +633,14 @@ class Memory(MemoryBase):
         metadata["data"] = data
         metadata["hash"] = hashlib.md5(data.encode()).hexdigest()
         metadata["created_at"] = datetime.now(pytz.timezone("US/Pacific")).isoformat()
+        metadata["categories"] = categories
 
         self.vector_store.insert(
             vectors=[embeddings],
             ids=[memory_id],
             payloads=[metadata],
         )
-        self.db.add_history(memory_id, None, data, "ADD", created_at=metadata["created_at"])
+        self.db.add_history(memory_id, None, data, categories, "ADD", created_at=metadata["created_at"])
         capture_event("mem0._create_memory", self, {"memory_id": memory_id})
         return memory_id
 

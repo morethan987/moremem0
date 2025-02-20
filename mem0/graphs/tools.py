@@ -125,7 +125,7 @@ EXTRACT_ENTITIES_TOOL = {
     "type": "function",
     "function": {
         "name": "extract_entities",
-        "description": "Extract the allowed entities and their types from the text.",
+        "description": "Extract the allowed entities and the most relevant types from the text.",
         "parameters": {
             "type": "object",
             "properties": {
@@ -282,7 +282,7 @@ EXTRACT_ENTITIES_STRUCT_TOOL = {
     "type": "function",
     "function": {
         "name": "extract_entities",
-        "description": "Extract the allowed entities and their types from the text.",
+        "description": "Extract the allowed entities and the most relevant types from the text.",
         "strict": True,
         "parameters": {
             "type": "object",
