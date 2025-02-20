@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "moremem0"
-version = "0.1.65"
+version = "0.1.68"
 description = "A modified version of the Mem0."
 authors = ["Morethan <2404385626@qq.com>"]
 exclude = [
