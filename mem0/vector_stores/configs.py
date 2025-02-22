@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -9,6 +9,8 @@ class VectorStoreConfig(BaseModel):
         default="qdrant",
     )
     config: Optional[Dict] = Field(description="Configuration for the specific vector store", default=None)
+    custom_prompt: Optional[str] = Field(description="Custom prompt for vector store", default=None)
+    custom_categories: Optional[List[Dict[str, str]]] = Field(description="Custom prompt for vector store", default=None)
 
     _provider_configs: Dict[str, str] = {
         "qdrant": "QdrantConfig",

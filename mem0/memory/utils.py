@@ -2,11 +2,11 @@ import re
 from mem0.configs.prompts import FACT_RETRIEVAL_PROMPT, DEFAULT_INCLUDED_INFO, DEFAULT_EXCLUDED_INFO
 from mem0.llms.openai import OpenAILLM
 
-def get_fact_retrieval_messages(message, includes, excludes):
+def get_fact_retrieval_messages(message, includes, excludes, custom_prompt=None):
     included_info = includes if includes else (DEFAULT_INCLUDED_INFO if not excludes else "Except for those specifically to be excluded")
     excluded_info = excludes if excludes else DEFAULT_EXCLUDED_INFO
-        
-    return FACT_RETRIEVAL_PROMPT.replace("INCLUDED_INFO", included_info).replace("EXCLUDED_INFO", excluded_info), f"Input:\n{message}"
+
+    return (custom_prompt if custom_prompt else FACT_RETRIEVAL_PROMPT).replace("{{INCLUDED_INFO}}", included_info).replace("{{EXCLUDED_INFO}}", excluded_info), f"Input:\n{message}"
 
 
 def parse_messages(messages):

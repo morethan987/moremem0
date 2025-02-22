@@ -25,7 +25,7 @@ from mem0.graphs.tools import (
     RELATIONS_STRUCT_TOOL,
     RELATIONS_TOOL,
 )
-from mem0.graphs.utils import EXTRACT_RELATIONS_PROMPT, get_delete_messages, get_extract_entities_prompt
+from mem0.graphs.utils import EXTRACT_RELATIONS_PROMPT, get_delete_messages, get_extract_entities_prompt, get_extract_relations_prompt
 from mem0.utils.factory import EmbedderFactory, LlmFactory
 
 logger = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ class MemoryGraph:
         self.threshold = 0.7
         self.structured_output_provider = ["azure_openai_structured", "openai_structured", "aliyun"]
 
-    def add(self, data, filters, custom_categories=None, graph_prompt=None, includes=None, excludes=None):
+    def add(self, data, filters, custom_node_types=None, custom_relations=None, graph_prompt=None, includes=None, excludes=None):
         """
         Adds data to the graph.
 
@@ -62,8 +62,8 @@ class MemoryGraph:
             data (str): The data to add to the graph.
             filters (dict): A dictionary containing filters to be applied during the addition.
         """
-        entity_type_map = self._retrieve_nodes_from_data(data=data, filters=filters, includes=includes, excludes=excludes, custom_categories=custom_categories)
-        to_be_added = self._establish_nodes_relations_from_data(data, filters, entity_type_map, graph_prompt) if entity_type_map else []
+        entity_type_map = self._retrieve_nodes_from_data(data=data, filters=filters, includes=includes, excludes=excludes, custom_node_types=custom_node_types, graph_prompt=graph_prompt)
+        to_be_added = self._establish_nodes_relations_from_data(data, filters, entity_type_map, graph_prompt, custom_relations=custom_relations) if entity_type_map else []
         search_output = self._search_graph_db(node_list=list(entity_type_map.keys()), filters=filters)
         to_be_deleted = self._get_delete_triples_from_search_output(search_output, data, filters)
 
@@ -88,7 +88,7 @@ class MemoryGraph:
                 - "contexts": List of search results from the base data store.
                 - "entities": List of related graph data based on the query.
         """
-        entity_type_map = self._retrieve_nodes_from_data(data=query, filters=filters, includes=None, excludes=None) # TODO 加一个includes/excludes过滤器？
+        entity_type_map = self._retrieve_nodes_from_data(data=query, filters=filters, includes=None, excludes=None)
         search_output = self._search_graph_db(node_list=list(entity_type_map.keys()), filters=filters)
 
         if not search_output:
@@ -117,7 +117,7 @@ class MemoryGraph:
         for item in reranked_results:
             search_results.append({"source": item[0], "relationship": item[1], "destination": item[2]})
 
-        logger.info(f"Returned {len(search_results)} search results")
+        logger.info(f"Returned {len(search_results)} search results\n")
 
         return search_results
 
@@ -160,12 +160,14 @@ class MemoryGraph:
                 }
             )
 
-        logger.info(f"Retrieved {len(final_results)} relationships")
+        logger.info(f"Retrieved {len(final_results)} relationships\n")
 
         return final_results
 
-    def _retrieve_nodes_from_data(self, data, filters, is_search=False, includes=None, excludes=None, custom_categories=None):
+    def _retrieve_nodes_from_data(self, data, filters, includes=None, excludes=None, custom_node_types=None, graph_prompt=None):
         """Extracts the allowed entities mentioned in the query."""
+        custom_prompt = graph_prompt if graph_prompt else self.config.graph_store.custom_prompt["entities_prompt"] if hasattr(self.config.graph_store.custom_prompt, 'entities_prompt') else None
+
         _tools = [EXTRACT_ENTITIES_TOOL]
         if self.llm_provider in self.structured_output_provider:
             _tools = [EXTRACT_ENTITIES_STRUCT_TOOL]
@@ -173,7 +175,7 @@ class MemoryGraph:
             messages=[
                 {
                     "role": "system",
-                    "content": get_extract_entities_prompt(user_id=filters["user_id"], includes=includes, excludes=excludes, custom_categories=custom_categories),
+                    "content": get_extract_entities_prompt(user_id=filters["user_id"], includes=includes, excludes=excludes, custom_node_types=custom_node_types, custom_prompt=custom_prompt),
                 },
                 {"role": "user", "content": data},
             ],
@@ -186,33 +188,24 @@ class MemoryGraph:
             for item in search_results["tool_calls"][0]["arguments"]["entities"]:
                 entity_type_map[item["entity"]] = item["entity_type"]
         except Exception as e:
-            logger.error(f"Error in search tool: {e}")
+            logger.error(f"Error in search tool: {e}\n")
 
-        entity_type_map = {k.lower().replace(" ", "_"): v.lower().replace(" ", "_") for k, v in entity_type_map.items()}
-        logger.debug(f"Entity type map: {entity_type_map}")
+        entity_type_map = {k.lower().replace(" ", "_"): [item.lower().replace(" ", "_") for item in v] if isinstance(v, list) else v.lower().replace(" ", "_") for k, v in entity_type_map.items()}
+        logger.debug(f"Entity type map: {entity_type_map}\n")
         return entity_type_map
 
-    def _establish_nodes_relations_from_data(self, data, filters, entity_type_map, graph_prompt=None):
+    def _establish_nodes_relations_from_data(self, data, filters, entity_type_map, graph_prompt=None, custom_relations=None):
         """Eshtablish relations among the extracted nodes."""
-        custom_prompt = graph_prompt if graph_prompt else self.config.graph_store.custom_prompt
-        if custom_prompt:
-            messages = [
-                {
-                    "role": "system",
-                    "content": EXTRACT_RELATIONS_PROMPT.replace("{USER_ID}", filters["user_id"]).replace(
-                        "{CUSTOM_PROMPT}", f"4. {custom_prompt}"
-                    ),
-                },
-                {"role": "user", "content": data},
-            ]
-        else:
-            messages = [
-                {
-                    "role": "system",
-                    "content": EXTRACT_RELATIONS_PROMPT.replace("{USER_ID}", filters["user_id"]),
-                },
-                {"role": "user", "content": f"List of entities: {list(entity_type_map.keys())}. \n\nText: {data}"},
-            ]
+
+        custom_prompt = graph_prompt if graph_prompt else self.config.graph_store.custom_prompt["relations_prompt"] if hasattr(self.config.graph_store.custom_prompt, 'relations_prompt') else None
+
+        messages = [
+            {
+                "role": "system",
+                "content": get_extract_relations_prompt(filters["user_id"], custom_relations, custom_prompt)
+            },
+            {"role": "user", "content": f"List of entities: {list(entity_type_map.keys())}. \n\nText: {data}"},
+        ]
 
         _tools = [RELATIONS_TOOL]
         if self.llm_provider in self.structured_output_provider:
@@ -229,7 +222,7 @@ class MemoryGraph:
             extracted_triples = []
 
         extracted_triples = self._remove_spaces_from_entities(extracted_triples)
-        logger.debug(f"Extracted triples: {extracted_triples}")
+        logger.debug(f"Extracted triples: {extracted_triples}\n")
         return extracted_triples
 
     def _search_graph_db(self, node_list, filters, limit=100):
@@ -297,7 +290,7 @@ class MemoryGraph:
                 to_be_deleted.append(item["arguments"])
         # in case if it is not in the correct format
         to_be_deleted = self._remove_spaces_from_entities(to_be_deleted)
-        logger.debug(f"Deleted relationships: {to_be_deleted}")
+        logger.debug(f"Deleted relationships: {to_be_deleted}\n")
         return to_be_deleted
 
     def _delete_relations(self, to_be_deleted, user_id):
@@ -338,8 +331,13 @@ class MemoryGraph:
             relationship = item["relationship"]
 
             # types
-            source_type = entity_type_map.get(source, "unknown")
-            destination_type = entity_type_map.get(destination, "unknown")
+            source_types = entity_type_map.get(source, "unknown")
+            if isinstance(source_types, str):
+                source_types = [source_types]
+            destination_types = entity_type_map.get(destination, "unknown")
+ 
+            if isinstance(destination_types, str):
+                destination_types = [destination_types]
 
             # embeddings
             source_embedding = self.embedding_model.embed(source)
@@ -349,13 +347,13 @@ class MemoryGraph:
             source_node_search_result = self._search_source_node(source_embedding, user_id, threshold=0.9)
             destination_node_search_result = self._search_destination_node(dest_embedding, user_id, threshold=0.9)
 
-            # TODO: Create a cypher query and common params for all the cases
             # 如果目标节点不存在，但源节点存在
             if not destination_node_search_result and source_node_search_result:
+                destination_labels = ':'.join(destination_types)
                 cypher = f"""
                     MATCH (source)
                     WHERE elementId(source) = $source_id
-                    MERGE (destination:{destination_type} {{name: $destination_name, user_id: $user_id}})
+                    MERGE (destination:{destination_labels} {{name: $destination_name, user_id: $user_id}})
                     ON CREATE SET
                         destination.created = timestamp(),
                         destination.embedding = $destination_embedding
@@ -369,7 +367,6 @@ class MemoryGraph:
                     "source_id": source_node_search_result[0]["elementId(source_candidate)"],
                     "destination_name": destination,
                     "relationship": relationship,
-                    "destination_type": destination_type,
                     "destination_embedding": dest_embedding,
                     "user_id": user_id,
                 }
@@ -378,10 +375,11 @@ class MemoryGraph:
 
             # 如果目标节点存在，但源节点不存在
             elif destination_node_search_result and not source_node_search_result:
+                source_labels = ':'.join(source_types)
                 cypher = f"""
                     MATCH (destination)
                     WHERE elementId(destination) = $destination_id
-                    MERGE (source:{source_type} {{name: $source_name, user_id: $user_id}})
+                    MERGE (source:{source_labels} {{name: $source_name, user_id: $user_id}})
                     ON CREATE SET
                         source.created = timestamp(),
                         source.embedding = $source_embedding
@@ -395,7 +393,6 @@ class MemoryGraph:
                     "destination_id": destination_node_search_result[0]["elementId(destination_candidate)"],
                     "source_name": source,
                     "relationship": relationship,
-                    "source_type": source_type,
                     "source_embedding": source_embedding,
                     "user_id": user_id,
                 }
@@ -426,22 +423,23 @@ class MemoryGraph:
 
             # 如果源节点和目标节点都不存在
             elif not source_node_search_result and not destination_node_search_result:
+                source_labels = ':'.join(source_types)
+                destination_labels = ':'.join(destination_types)
                 cypher = f"""
-                    MERGE (n:{source_type} {{name: $source_name, user_id: $user_id}})
+                    MERGE (n:{source_labels} {{name: $source_name, user_id: $user_id}})
                     ON CREATE SET n.created = timestamp(), n.embedding = $source_embedding
                     ON MATCH SET n.embedding = $source_embedding
-                    MERGE (m:{destination_type} {{name: $dest_name, user_id: $user_id}})
+                    MERGE (m:{destination_labels} {{name: $dest_name, user_id: $user_id}})
                     ON CREATE SET m.created = timestamp(), m.embedding = $dest_embedding
                     ON MATCH SET m.embedding = $dest_embedding
                     MERGE (n)-[rel:{relationship}]->(m)
                     ON CREATE SET rel.created = timestamp()
                     RETURN n.name AS source, type(rel) AS relationship, m.name AS target
                     """
+
                 params = {
                     "source_name": source,
-                    "source_type": source_type,
                     "dest_name": destination,
-                    "destination_type": destination_type,
                     "source_embedding": source_embedding,
                     "dest_embedding": dest_embedding,
                     "user_id": user_id,

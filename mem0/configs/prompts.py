@@ -27,11 +27,11 @@ FACT_RETRIEVAL_PROMPT = f"""You are a Personal Information Organizer, specialize
 
 Types of information to remember:
 
-INCLUDED_INFO
+{{INCLUDED_INFO}}
 
 Types of information should be ignored:
 
-EXCLUDED_INFO
+{{EXCLUDED_INFO}}
 
 Here are some examples:
 
@@ -54,7 +54,7 @@ Input: "Input:\nuser: My favourite movies are Inception and Interstellar."
 Output: {{"facts": ["Favourite movies are Inception and Interstellar"]}}
 
 Input: "Input:\nsystem: Recommend food delivery choices when the user asks for them.\nuser: Where can I get pizza?\nassistant: As I recall, your favorite style of pizza is deep-dish, and there is a deep-dish pizza restaurant nearby, do you want more information?\nuser: Deep-dish is not my favorite kind of pizza..."
-Output: {{"facts": ["Likes pizza", ["Favorite style of pizza is not deep-dish"]}}
+Output: {{"facts": ["Likes pizza", "Favorite style of pizza is not deep-dish"]}}
 
 Return the facts and preferences as JSON in the structure shown above.
 

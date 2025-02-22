@@ -26,14 +26,31 @@ from mem0.utils.factory import EmbedderFactory, LlmFactory, VectorStoreFactory
 # Setup user config
 setup_config()
 
-logger = logging.getLogger(__name__)
+# 创建 logger 对象
+logger = logging.getLogger('mem0')
+
+# 设置 `mem0` logger 的日志级别
+logger.setLevel(logging.WARNING)
+
+# 创建控制台 Handler，并设置级别
+console_handler = logging.StreamHandler()
+
+# 设置日志输出格式
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+
+# 将 Handler 添加到 logger
+logger.addHandler(console_handler)
+
+# 关闭其他库的日志输出
+logging.getLogger().setLevel(logging.WARNING)  # 关闭默认日志级别为DEBUG的日志，避免无关日志输出
 
 
 class Memory(MemoryBase):
     def __init__(self, config: MemoryConfig = MemoryConfig()):
         self.config = config
 
-        self.custom_prompt = self.config.custom_prompt
+        self.custom_prompt = self.config.vector_store.custom_prompt
         self.embedding_model = EmbedderFactory.create(self.config.embedder.provider, self.config.embedder.config)
         self.vector_store = VectorStoreFactory.create(
             self.config.vector_store.provider, self.config.vector_store.config
@@ -58,7 +75,7 @@ class Memory(MemoryBase):
         try:
             config = MemoryConfig(**config_dict)
         except ValidationError as e:
-            logger.error(f"Configuration validation error: {e}")
+            logger.error(f"Configuration validation error: {e}\n")
             raise
         return cls(config)
 
@@ -110,9 +127,19 @@ class Memory(MemoryBase):
             dic["graph"] = dic.get("graph")
 
         # 解析custom_categories
-        custom_categories = kwargs.get("custom_categories")
+        custom_categories = kwargs.get("custom_categories") or self.config.vector_store.custom_categories
         if custom_categories:
             custom_categories = "\n".join([f"- {key}: {value}" for category in custom_categories for key, value in category.items()])
+
+        # 解析custom_node_types
+        custom_node_types = kwargs.get("custom_node_types") or self.config.graph_store.custom_node_types
+        if custom_node_types:
+            custom_node_types = "\n".join([f"- {key}: {value}" for node_type in custom_node_types for key, value in node_type.items()])
+
+        # 解析custom_relations
+        custom_relations = kwargs.get("custom_relations") or self.config.graph_store.custom_relations
+        if custom_relations:
+            custom_relations = "\n".join([f"- {key}: {value}" for relation in custom_relations for key, value in relation.items()])
 
         if not any(key in filters for key in ("user_id", "agent_id", "run_id")):
             raise ValueError("One of the filters: user_id, agent_id or run_id is required!")
@@ -123,9 +150,9 @@ class Memory(MemoryBase):
         messages = parse_vision_messages(messages)
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            future1 = executor.submit(self._add_to_vector_store, messages, metadata, filters, custom_categories=None, prompt=kwargs.get("prompt"), includes=includes_dic["vector"], excludes=excludes_dic["vector"])
+            future1 = executor.submit(self._add_to_vector_store, messages, metadata, filters, custom_categories, prompt=kwargs.get("prompt"), includes=includes_dic["vector"], excludes=excludes_dic["vector"])
             
-            future2 = executor.submit(self._add_to_graph, messages, filters, custom_categories=None, graph_prompt=kwargs.get("graph_prompt"), includes=includes_dic["graph"], excludes=excludes_dic["graph"])
+            future2 = executor.submit(self._add_to_graph, messages, filters, custom_node_types=custom_node_types, custom_relations=custom_relations, graph_prompt=kwargs.get("graph_prompt"), includes=includes_dic["graph"], excludes=excludes_dic["graph"])
 
             concurrent.futures.wait([future1, future2])
 
@@ -166,11 +193,7 @@ class Memory(MemoryBase):
         parsed_messages = parse_messages(messages)
 
         custom_prompt = prompt if prompt else self.custom_prompt
-        if custom_prompt:
-            system_prompt = custom_prompt
-            user_prompt = f"Input:\n{parsed_messages}"
-        else:
-            system_prompt, user_prompt = get_fact_retrieval_messages(parsed_messages, includes, excludes)
+        system_prompt, user_prompt = get_fact_retrieval_messages(parsed_messages, includes, excludes, custom_prompt)
 
         response = self.llm.generate_response(
             messages=[
@@ -203,7 +226,7 @@ class Memory(MemoryBase):
         # remove same records
         retrieved_old_memory = list({item["id"]: item for item in retrieved_old_memory}.values())
 
-        logging.info(f"Total existing memories: {len(retrieved_old_memory)}")
+        logger.info(f"Total existing memories: {len(retrieved_old_memory)}\n")
 
         # mapping UUIDs with integers for handling UUID hallucinations
         temp_uuid_mapping = {}
@@ -220,6 +243,7 @@ class Memory(MemoryBase):
         # 从原始响应中解析出记忆
         new_memories_with_actions = remove_code_blocks(new_memories_with_actions)
         new_memories_with_actions = json.loads(new_memories_with_actions)
+        logger.debug(f"the initial new_memories_with_actions: {new_memories_with_actions}\n")
         
         # 过滤出ADD类型的记忆
         add_memories = [mem for mem in new_memories_with_actions["memory"] if mem["event"] == "ADD"]
@@ -233,6 +257,7 @@ class Memory(MemoryBase):
             )
             memories_with_categories = remove_code_blocks(memories_with_categories)
             memories_with_categories = json.loads(memories_with_categories)
+            logger.debug(f"add only memories: {memories_with_categories}\n")
             
             # 将categories合并回原始记忆中
             add_memories_dict = {mem["text"]: mem for mem in add_memories}
@@ -245,9 +270,10 @@ class Memory(MemoryBase):
             new_memories_with_actions["memory"] = add_memories + non_add_memories
 
         returned_memories = []
+        logger.debug(f"the final new_memories_with_actions: {new_memories_with_actions}\n")
         try:
             for resp in new_memories_with_actions["memory"]:
-                logging.info(resp)
+                logger.info(f"the element in {resp}\n")
                 try:
                     if resp["event"] == "ADD":
                         memory_id = self._create_memory(
@@ -294,14 +320,14 @@ class Memory(MemoryBase):
 
         return returned_memories
 
-    def _add_to_graph(self, messages, filters, custom_categories, graph_prompt=None, includes=None, excludes=None):
+    def _add_to_graph(self, messages, filters, custom_node_types=None, custom_relations=None, graph_prompt=None, includes=None, excludes=None):
         added_entities = []
         if self.api_version == "v1.1" and self.enable_graph:
             if filters.get("user_id") is None:
                 filters["user_id"] = "user"
 
             data = "\n".join([msg["content"] for msg in messages if "content" in msg and msg["role"] != "system"])
-            added_entities = self.graph.add(data, filters, custom_categories, graph_prompt, includes, excludes)
+            added_entities = self.graph.add(data, filters, custom_node_types, custom_relations, graph_prompt, includes, excludes)
 
         return added_entities
 
@@ -602,7 +628,7 @@ class Memory(MemoryBase):
         for memory in memories:
             self._delete_memory(memory.id)
 
-        logger.info(f"Deleted {len(memories)} memories")
+        logger.info(f"Deleted {len(memories)} memories\n")
 
         if self.api_version == "v1.1" and self.enable_graph:
             self.graph.delete_all(filters)
@@ -623,7 +649,7 @@ class Memory(MemoryBase):
         return self.db.get_history(memory_id)
 
     def _create_memory(self, data, existing_embeddings, categories, metadata=None):
-        logging.info(f"Creating memory with {data=}")
+        logger.info(f"Creating memory with {data=}\n")
         if data in existing_embeddings:
             embeddings = existing_embeddings[data]
         else:
@@ -645,7 +671,7 @@ class Memory(MemoryBase):
         return memory_id
 
     def _update_memory(self, memory_id, data, existing_embeddings, metadata=None):
-        logger.info(f"Updating memory with {data=}")
+        logger.info(f"Updating memory with {data=}\n")
 
         try:
             existing_memory = self.vector_store.get(vector_id=memory_id)
@@ -675,7 +701,7 @@ class Memory(MemoryBase):
             vector=embeddings,
             payload=new_metadata,
         )
-        logger.info(f"Updating memory with ID {memory_id=} with {data=}")
+        logger.info(f"Updating memory with ID {memory_id=} with {data=}\n")
         self.db.add_history(
             memory_id,
             prev_value,
@@ -688,7 +714,7 @@ class Memory(MemoryBase):
         return memory_id
 
     def _delete_memory(self, memory_id):
-        logging.info(f"Deleting memory with {memory_id=}")
+        logger.info(f"Deleting memory with {memory_id=}\n")
         existing_memory = self.vector_store.get(vector_id=memory_id)
         prev_value = existing_memory.payload["data"]
         self.vector_store.delete(vector_id=memory_id)
@@ -700,7 +726,7 @@ class Memory(MemoryBase):
         """
         Reset the memory store.
         """
-        logger.warning("Resetting all memories")
+        logger.warning("Resetting all memories\n")
         self.vector_store.delete_col()
         self.vector_store = VectorStoreFactory.create(
             self.config.vector_store.provider, self.config.vector_store.config

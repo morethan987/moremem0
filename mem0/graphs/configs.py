@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List, Dict
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -28,6 +28,12 @@ class GraphStoreConfig(BaseModel):
     llm: Optional[LlmConfig] = Field(description="LLM configuration for querying the graph store", default=None)
     custom_prompt: Optional[str] = Field(
         description="Custom prompt to fetch entities from the given text", default=None
+    )
+    custom_node_types: Optional[List[Dict[str, str]]] = Field(
+        description="Custom node types for the graph", default=None
+    )
+    custom_relations: Optional[List[Dict[str, str]]] = Field(
+        description="Custom relation types for the graph", default=None
     )
 
     @field_validator("config")

@@ -86,7 +86,7 @@ RELATIONS_TOOL = {
     "type": "function",
     "function": {
         "name": "establish_relationships",
-        "description": "Establish relationships among the entities based on the provided text.",
+        "description": "Chose a listed relationship to describe the relation between the entities.",
         "parameters": {
             "type": "object",
             "properties": {
@@ -135,7 +135,11 @@ EXTRACT_ENTITIES_TOOL = {
                         "type": "object",
                         "properties": {
                             "entity": {"type": "string", "description": "The name or identifier of the entity."},
-                            "entity_type": {"type": "string", "description": "The type or category of the entity."},
+                            "entity_type": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                                "description": "The types or categories of the entity.",
+                            },
                         },
                         "required": ["entity", "entity_type"],
                         "additionalProperties": False,
@@ -239,7 +243,7 @@ RELATIONS_STRUCT_TOOL = {
     "type": "function",
     "function": {
         "name": "establish_relations",
-        "description": "Establish relationships among the entities based on the provided text.",
+        "description": "Chose a listed relationship to describe the relation between the entities.",
         "strict": True,
         "parameters": {
             "type": "object",
@@ -293,7 +297,11 @@ EXTRACT_ENTITIES_STRUCT_TOOL = {
                         "type": "object",
                         "properties": {
                             "entity": {"type": "string", "description": "The name or identifier of the entity."},
-                            "entity_type": {"type": "string", "description": "The type or category of the entity."},
+                            "entity_type": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                                "description": "The types or categories of the entity.",
+                            },
                         },
                         "required": ["entity", "entity_type"],
                         "additionalProperties": False,

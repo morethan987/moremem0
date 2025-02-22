@@ -1,5 +1,3 @@
-from mem0.configs.prompts import DEFAULT_CATEGORIES
-
 UPDATE_GRAPH_PROMPT = """
 You are an AI expert specializing in graph memory management and optimization. Your task is to analyze existing graph memories alongside new information, and update the relationships in the memory list to ensure the most accurate, current, and coherent representation of knowledge.
 
@@ -41,36 +39,36 @@ EXTRACT_ENTITIES_PROMPT = """
 **Ignore** entities in the text related to the following topics:
 {EXCLUDED_INFO}
 
-Please choose ONE most relevant type of the entity **from the following list**:
-{CATEGORIES}
+Please choose the most relevant type of the entity **ONLY** from the following list, you can choose more if necessary:
+{NODE_TYPES}
 
 - For any self-reference words like 'I', 'me', 'my', etc., replace them with {USER_ID}. Do not treat them as 'I' or 'me'—they should always be mapped to {USER_ID}.
 - If the only entity is 'I', 'me', 'my', etc., treat the entity as {USER_ID}.
+- If the topic of the text is not in the identify list, or is in the ignore list, do not extract entity information.
 - If the user input is a question, **do not** answer questions directly.
+- Types of the entity should be selected **ONLY** from the type list, even it's not accurate.
 - Just call the tool please.
 """
 
 EXTRACT_RELATIONS_PROMPT = """
-
 You are an advanced algorithm designed to extract structured information from text to construct knowledge graphs. Your goal is to capture comprehensive and accurate information. Follow these key principles:
 
 1. Extract only explicitly stated information from the text.
 2. Establish relationships among the entities provided.
 3. Use "{USER_ID}" as the source entity for any self-references (e.g., "I," "me," "my," etc.) in user messages.
-{CUSTOM_PROMPT}
 
-Relationships:
-    - Use consistent, general, and timeless relationship types.
-    - Example: Prefer "professor" over "became_professor."
-    - Relationships should only be established among the entities explicitly mentioned in the user message.
+Relationships should **ONLY** be selected from the following options:
+{RELATIONS}
 
 Entity Consistency:
-    - Ensure that relationships are coherent and logically align with the context of the message.
-    - Maintain consistent naming for entities across the extracted data.
+- Ensure that relationships are coherent and logically align with the context of the message.
+- Maintain consistent naming for entities across the extracted data.
 
-Strive to construct a coherent and easily understandable knowledge graph by eshtablishing all the relationships among the entities and adherence to the user's context.
+Attention:
+- Only use the relations listed above, even it's not coherent.
 
-Adhere strictly to these guidelines to ensure high-quality knowledge graph extraction."""
+Adhere strictly to these guidelines to ensure high-quality knowledge graph extraction.
+"""
 
 DELETE_RELATIONS_SYSTEM_PROMPT = """
 You are a graph memory manager specializing in identifying, managing, and optimizing relationships within graph-based memories. Your primary task is to analyze a list of existing relationships and determine which ones should be deleted based on the new information provided.
@@ -108,14 +106,24 @@ source -- relationship -- destination
 Provide a list of deletion instructions, each specifying the relationship to be deleted.
 """
 
+# 实在是太多了，不是特别好定义
+DEFAULT_NODE_TYPES = """
+- food
+- person
+- sport
+- contact
+"""
 
 def get_delete_messages(existing_memories_string, data, user_id):
     return DELETE_RELATIONS_SYSTEM_PROMPT.replace(
         "USER_ID", user_id
     ), f"Here are the existing memories: {existing_memories_string} \n\n New Information: {data}"
 
-def get_extract_entities_prompt(user_id, includes=None, excludes=None, custom_categories=None):
+def get_extract_entities_prompt(user_id, includes=None, excludes=None, custom_node_types=None, custom_prompt=None):
     included_info = includes if includes else ("All" if not excludes else "Except for those specifically to be excluded")
     excluded_info = excludes if excludes else "None"
     
-    return EXTRACT_ENTITIES_PROMPT.replace("{USER_ID}", user_id).replace("{INCLUDED_INFO}", included_info).replace("{EXCLUDED_INFO}", excluded_info).replace("{CATEGORIES}", custom_categories if custom_categories else DEFAULT_CATEGORIES) # TODO 这里不能直接用类别，因为实体的分类的偏好的分类不一致
+    return (custom_prompt if custom_prompt else EXTRACT_ENTITIES_PROMPT).replace("{USER_ID}", user_id).replace("{INCLUDED_INFO}", included_info).replace("{EXCLUDED_INFO}", excluded_info).replace("{NODE_TYPES}", custom_node_types if custom_node_types else "No specific types, you can set one brief type by your own, you can set more types if necessary")
+
+def get_extract_relations_prompt(user_id, custom_relations=None, custom_prompt=None):
+    return (custom_prompt if custom_prompt else EXTRACT_RELATIONS_PROMPT).replace("{USER_ID}", user_id).replace("{RELATIONS}", custom_relations if custom_relations else "No specific options, you can establish relations by your own")
