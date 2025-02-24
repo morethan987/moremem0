@@ -97,6 +97,7 @@ class MemoryGraph:
         search_outputs_sequence = [
             [item["source"], item["relatationship"], item["destination"]] for item in search_output
         ]
+        # TODO 使用外部模型来进行重排序
         # print(search_outputs_sequence)
         bm25 = BM25Okapi(search_outputs_sequence)
 

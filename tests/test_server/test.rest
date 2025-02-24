@@ -1,0 +1,92 @@
+@memory_id = your-memory-id-here
+
+### 获取文档
+GET http://localhost:8000/docs
+
+### 配置内存实例
+POST http://localhost:8000/configure
+Content-Type: application/json
+
+{
+    "vector_store": {
+        "provider": "qdrant",
+        "config": {
+            "collection_name": "test",
+            "host": "localhost",
+            "port": 6333,
+            "embedding_model_dims": 1024
+        }
+    },
+    "graph_store": {
+        "provider": "neo4j",
+        "config": {
+            "url": "neo4j://localhost:7687",
+            "username": "neo4j",
+            "password": "mo123456789"
+        }
+    },
+    "llm": {
+        "provider": "aliyun",
+        "config": {
+            "model": "qwen-max-latest",
+            "temperature": 0.0,
+            "top_p": 0.1,
+            "max_tokens": 8000,
+            "aliyun_base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+        }
+    },
+    "embedder": {
+        "provider": "siliconflow",
+        "config": {
+            "model": "Pro/BAAI/bge-m3",
+            "siliconflow_base_url": "https://api.siliconflow.cn/v1/embeddings"
+        }
+    },
+    "version": "v1.1"
+}
+
+### 添加记忆
+POST http://localhost:8000/memories
+Content-Type: application/json
+
+{
+    "messages": [
+        {
+            "role": "user",
+            "content": "I like to eat pizza, I have a dog named Pitter."
+        }
+    ],
+    "user_id": "morethan"
+}
+
+### 获取所有记忆
+GET http://localhost:8000/memories?user_id=morethan
+
+### 根据关键词搜索记忆
+POST http://localhost:8000/search
+Content-Type: application/json
+
+{
+    "query": "What do you know about me?",
+    "user_id": "morethan"
+}
+
+### 获取指定记忆的历史
+GET http://localhost:8000/memories/{{memory_id}}/history
+
+### 更新指定记忆
+PUT http://localhost:8000/memories/{{memory_id}}
+Content-Type: application/json
+
+{
+    "content": "Updated memory content"
+}
+
+### 删除指定记忆
+DELETE http://localhost:8000/memories/{{memory_id}}
+
+### 删除用户的所有记忆
+DELETE http://localhost:8000/memories?user_id=morethan
+
+### 重置所有记忆
+POST http://localhost:8000/reset

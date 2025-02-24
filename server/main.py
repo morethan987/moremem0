@@ -9,7 +9,36 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-MEMORY_INSTANCE = Memory()
+# 从环境变量获取数据库配置或使用默认值
+NEO4J_HOST = os.getenv("NEO4J_HOST", "localhost")
+NEO4J_PORT = os.getenv("NEO4J_PORT", "7687")
+QDRANT_HOST = os.getenv("QDRANT_HOST", "localhost")
+QDRANT_PORT = os.getenv("QDRANT_PORT", "6333")
+
+# 默认配置
+DEFAULT_CONFIG = {
+    "version": "v1.1",
+    "vector_store": {
+        "provider": "qdrant",
+        "config": {
+            "collection_name": "test",
+            "host": QDRANT_HOST,
+            "port": int(QDRANT_PORT),
+            "embedding_model_dims": 1024
+        }
+    },
+    "graph_store": {
+        "provider": "neo4j",
+        "config": {
+            "url": f"neo4j://{NEO4J_HOST}:{NEO4J_PORT}",
+            "username": "neo4j",
+            "password": "mo123456789"
+        }
+    }
+}
+
+# 初始化Memory实例
+MEMORY_INSTANCE = Memory.from_config(DEFAULT_CONFIG)
 
 app = FastAPI(
     title="Mem0 REST APIs",
@@ -42,7 +71,15 @@ class SearchRequest(BaseModel):
 def set_config(config: Dict[str, Any]):
     """Set memory configuration."""
     global MEMORY_INSTANCE
-    MEMORY_INSTANCE = Memory.from_config(config)
+    # 合并用户配置和默认数据库配置
+    merged_config = config.copy()
+    if "vector_store" in merged_config:
+        merged_config["vector_store"]["config"]["host"] = QDRANT_HOST
+        merged_config["vector_store"]["config"]["port"] = int(QDRANT_PORT)
+    if "graph_store" in merged_config:
+        merged_config["graph_store"]["config"]["url"] = f"neo4j://{NEO4J_HOST}:{NEO4J_PORT}"
+    
+    MEMORY_INSTANCE = Memory.from_config(merged_config)
     return {"message": "Configuration set successfully"}
 
 
