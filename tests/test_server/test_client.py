@@ -1,6 +1,11 @@
 from mem0.client_simplified.main import MemoryClient
+from dotenv import load_dotenv
+import os
 
-client = MemoryClient(host="http://...") # 实例化客户端
+# 加载 .env 文件
+load_dotenv()
+
+client = MemoryClient(host=os.getenv("HOST_URL")) # 实例化客户端
 
 # 语言模型
 deepseek_config = {
@@ -102,11 +107,11 @@ test_messages = [
 # 添加记忆并打印返回消息
 print(client.add(test_messages, user_id="morethan"))
 
-# 执行记忆搜索并打印返回消息
-print(client.search("What do I like to eat?", user_id='morethan'))
+# # 执行记忆搜索并打印返回消息
+# print(client.search("What do I like to eat?", user_id='morethan'))
 
-# 查看存储到的所有记忆
-print(client.get_all(user_id="morethan"))
+# # 查看存储到的所有记忆
+# print(client.get_all(user_id="morethan"))
 
-# 删除某个用户的所有的记忆
-print(client.delete_all(user_id="morethan"))
+# # 删除某个用户的所有的记忆
+# print(client.delete_all(user_id="morethan"))

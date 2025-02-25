@@ -50,6 +50,7 @@ class MemoryClient:
         self.client = httpx.Client(
             base_url=self.host,
             timeout=60.0,
+            verify=False,
         )
 
     @api_error_handler
