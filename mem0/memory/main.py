@@ -706,6 +706,7 @@ class Memory(MemoryBase):
             memory_id,
             prev_value,
             data,
+            None,
             "UPDATE",
             created_at=new_metadata["created_at"],
             updated_at=new_metadata["updated_at"],
@@ -718,7 +719,7 @@ class Memory(MemoryBase):
         existing_memory = self.vector_store.get(vector_id=memory_id)
         prev_value = existing_memory.payload["data"]
         self.vector_store.delete(vector_id=memory_id)
-        self.db.add_history(memory_id, prev_value, None, "DELETE", is_deleted=1)
+        self.db.add_history(memory_id, prev_value, None, None, "DELETE", is_deleted=1)
         capture_event("mem0._delete_memory", self, {"memory_id": memory_id})
         return memory_id
 

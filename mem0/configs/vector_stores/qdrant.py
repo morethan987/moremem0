@@ -1,16 +1,22 @@
-from typing import Any, ClassVar, Dict, Optional
+from typing import Any, ClassVar, Dict, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from qdrant_client import QdrantClient
+else:
+    QdrantClient = None
 
 from pydantic import BaseModel, Field, model_validator
 
 
 class QdrantConfig(BaseModel):
-    from qdrant_client import QdrantClient
 
-    QdrantClient: ClassVar[type] = QdrantClient
+    from qdrant_client import QdrantClient as _QdrantClient
+  # runtime import
+    QdrantClient: ClassVar[type] = _QdrantClient
 
     collection_name: str = Field("mem0", description="Name of the collection")
     embedding_model_dims: Optional[int] = Field(1024, description="Dimensions of the embedding model")
-    client: Optional[QdrantClient] = Field(None, description="Existing Qdrant client instance")
+    client: Optional["QdrantClient"] = Field(None, description="Existing Qdrant client instance")
     host: Optional[str] = Field(None, description="Host address for Qdrant server")
     port: Optional[int] = Field(None, description="Port for Qdrant server")
     path: Optional[str] = Field("/tmp/qdrant", description="Path for local Qdrant database")

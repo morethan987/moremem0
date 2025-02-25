@@ -140,6 +140,7 @@ class Qdrant(VectorStoreBase):
             list: Search results.
         """
         query_filter = self._create_filter(filters) if filters else None
+        # 这个方法马上就要被废弃了，等待官方更新
         hits = self.client.search(
             collection_name=self.collection_name,
             query_vector=query,

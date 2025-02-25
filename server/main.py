@@ -34,7 +34,24 @@ DEFAULT_CONFIG = {
             "username": "neo4j",
             "password": "mo123456789"
         }
-    }
+    },
+    "llm": {
+        "provider": "aliyun",
+        "config": {
+            "model": "qwen-max-latest",
+            "temperature": 0.0,
+            "top_p": 0.1,
+            "max_tokens": 8000,
+            "aliyun_base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+        }
+    },
+    "embedder": {
+        "provider": "siliconflow",
+        "config": {
+            "model": "Pro/BAAI/bge-m3",
+            "siliconflow_base_url": "https://api.siliconflow.cn/v1/embeddings"
+        }
+    },
 }
 
 # 初始化Memory实例
@@ -71,13 +88,22 @@ class SearchRequest(BaseModel):
 def set_config(config: Dict[str, Any]):
     """Set memory configuration."""
     global MEMORY_INSTANCE
+    
+    # 定义一个深度合并字典的函数
+    def deep_merge(default_dict: Dict[str, Any], user_dict: Dict[str, Any]) -> Dict[str, Any]:
+        """递归合并两个字典，用户字典中的值优先，缺失值用默认字典填充"""
+        merged = default_dict.copy()  # 创建默认字典的副本
+        
+        for key, user_value in user_dict.items():
+            # 如果两个字典中的值都是字典，则递归合并
+            if key in default_dict and isinstance(default_dict[key], dict) and isinstance(user_value, dict):
+                merged[key] = deep_merge(default_dict[key], user_value)
+            else:  # 否则直接使用用户字典中的值
+                merged[key] = user_value
+        return merged
+    
     # 合并用户配置和默认数据库配置
-    merged_config = config.copy()
-    if "vector_store" in merged_config:
-        merged_config["vector_store"]["config"]["host"] = QDRANT_HOST
-        merged_config["vector_store"]["config"]["port"] = int(QDRANT_PORT)
-    if "graph_store" in merged_config:
-        merged_config["graph_store"]["config"]["url"] = f"neo4j://{NEO4J_HOST}:{NEO4J_PORT}"
+    merged_config = deep_merge(DEFAULT_CONFIG, config)
     
     MEMORY_INSTANCE = Memory.from_config(merged_config)
     return {"message": "Configuration set successfully"}

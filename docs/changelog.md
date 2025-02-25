@@ -1,5 +1,25 @@
 # 更新日志
 
+## 2025-02-24
+
+### morethan987
+
+- 配置服务器的外网端口
+
+- 编写服务器使用指南`tests\test_server\readme.md`
+
+## 2025-02-24
+
+### morethan987
+
+- 解决一个历史遗留警告`mem0\configs\vector_stores\qdrant.py`
+
+## 2025-02-24
+
+### morethan987
+
+- 本地Docker部署，成功收到http响应
+
 ## 2025-02-23
 
 ### morethan987
