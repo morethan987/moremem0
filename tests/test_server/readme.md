@@ -21,15 +21,10 @@ print(client.add(test_messages, user_id="xxx")) # 自己拟定一个user_id
 
 直接运行上面的代码之后，你的终端会收到类似下面的http响应：
 ```json
-{"results":[{"id":"1b0a1193-c818-42d9-bb55-c4bace5d09f1","memory":"Likes to eat pizza","event":"ADD","categories":["food"]},{"id":"823b64f3-770d-48f1-a020-c89860b4eaf4","memory":"Has a dog named Pitter","event":"ADD","categories":["family","hobbies"]}],"relations":{"deleted_relations":[],"added_triples":[[{"source":"morethan","relationship":"likes_to_eat","target":"pizza"}],[{"source":"morethan","relationship":"has_a_dog_named","target":"pitter"}]]}}
-```
-
-稍微好看一点儿就是：
-```json
 {
   "results": [
     {
-      "id": "1b0a1193-c818-42d9-bb55-c4bace5d09f1",
+      "id": "4e737279-653f-4395-858f-7e1385c7444a",
       "memory": "Likes to eat pizza",
       "event": "ADD",
       "categories": [
@@ -37,12 +32,12 @@ print(client.add(test_messages, user_id="xxx")) # 自己拟定一个user_id
       ]
     },
     {
-      "id": "823b64f3-770d-48f1-a020-c89860b4eaf4",
+      "id": "8e531993-d958-4e4d-9d2c-bdeacb02b6d3",
       "memory": "Has a dog named Pitter",
       "event": "ADD",
       "categories": [
         "family",
-        "hobbies"
+        "misc"
       ]
     }
   ],
@@ -52,15 +47,28 @@ print(client.add(test_messages, user_id="xxx")) # 自己拟定一个user_id
       [
         {
           "source": "morethan",
+          "source_labels": [
+            "person"
+          ],
           "relationship": "likes_to_eat",
-          "target": "pizza"
+          "target": "pizza",
+          "target_labels": [
+            "food"
+          ]
         }
       ],
       [
         {
           "source": "morethan",
+          "source_labels": [
+            "person"
+          ],
           "relationship": "has_a_dog_named",
-          "target": "pitter"
+          "target": "pitter",
+          "target_labels": [
+            "pet",
+            "dog"
+          ]
         }
       ]
     ]

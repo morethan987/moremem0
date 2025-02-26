@@ -361,7 +361,7 @@ class MemoryGraph:
                     MERGE (source)-[r:{relationship}]->(destination)
                     ON CREATE SET 
                         r.created = timestamp()
-                    RETURN source.name AS source, type(r) AS relationship, destination.name AS target
+                    RETURN source.name AS source, labels(source) AS source_labels, type(r) AS relationship, destination.name AS target, labels(destination) AS target_labels
                     """
 
                 params = {
@@ -387,7 +387,7 @@ class MemoryGraph:
                     MERGE (source)-[r:{relationship}]->(destination)
                     ON CREATE SET 
                         r.created = timestamp()
-                    RETURN source.name AS source, type(r) AS relationship, destination.name AS target
+                    RETURN source.name AS source, labels(source) AS source_labels, type(r) AS relationship, destination.name AS target, labels(destination) AS target_labels
                     """
 
                 params = {
@@ -411,7 +411,7 @@ class MemoryGraph:
                     ON CREATE SET 
                         r.created_at = timestamp(),
                         r.updated_at = timestamp()
-                    RETURN source.name AS source, type(r) AS relationship, destination.name AS target
+                    RETURN source.name AS source, labels(source) AS source_labels, type(r) AS relationship, destination.name AS target, labels(destination) AS target_labels
                     """
                 params = {
                     "source_id": source_node_search_result[0]["elementId(source_candidate)"],
@@ -435,7 +435,7 @@ class MemoryGraph:
                     ON MATCH SET m.embedding = $dest_embedding
                     MERGE (n)-[rel:{relationship}]->(m)
                     ON CREATE SET rel.created = timestamp()
-                    RETURN n.name AS source, type(rel) AS relationship, m.name AS target
+                    RETURN n.name AS source, labels(n) AS source_labels, type(rel) AS relationship, m.name AS target, labels(m) AS target_labels
                     """
 
                 params = {

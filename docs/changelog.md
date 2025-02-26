@@ -6,6 +6,10 @@
 
 - 实践证明`mem0\configs\vector_stores\qdrant.py`中的奇怪的命令确实是会影响服务器的启动：`QdrantClient: ClassVar[type] = QdrantClient`；并且暂时没有想到什么好的解决警告的方案
 
+- 更新服务器说明文档，添加了日志的查看方法
+
+- add操作的返回新增结点的标签字段
+
 ## 2025-02-25
 
 ### morethan987
@@ -19,10 +23,6 @@
 ### morethan987
 
 - 解决一个历史遗留警告`mem0\configs\vector_stores\qdrant.py`
-
-## 2025-02-24
-
-### morethan987
 
 - 本地Docker部署，成功收到http响应
 

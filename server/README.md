@@ -20,3 +20,9 @@ The default configuration is `E:/neo4j/plugins`.
 Once the server is running (locally or via Docker), you can interact with it using any REST client or through your preferred programming language (e.g., Go, Java, etc.). You can test out the APIs using the OpenAPI documentation at [`http://localhost:8000/docs`](http://localhost:8000/docs) endpoint.
 
 Here I prepare a test file for you: `tests\test_server\test.rest`. To use it, you need to download the VS Code plugin `REST Client`. Then toggle the button floating on each http request instruction, you will see the response.
+
+### Check the event log
+
+When the container is running, type `docker exec -it server-app-1 /bin/bash` into your shell. You can use the command `docker ps` to list all the running container.
+
+Then you will enter a normal Linux terminal window. The log is stored in the `~/.mem0` named `history.db`. The only thing you should do is to copy it and paste into `/app/log`. The file will appeare in the `log` folder in your root direction.
