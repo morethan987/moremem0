@@ -5,8 +5,7 @@ from pydantic import BaseModel, Field, model_validator
 class QdrantConfig(BaseModel):
 
     from qdrant_client import QdrantClient
-    # 官方源代码里面也是这么写的，但是有点问题
-    # QdrantClient: ClassVar[type] = QdrantClient
+    QdrantClient: ClassVar[type] = QdrantClient
 
     collection_name: str = Field("mem0", description="Name of the collection")
     embedding_model_dims: Optional[int] = Field(1024, description="Dimensions of the embedding model")
