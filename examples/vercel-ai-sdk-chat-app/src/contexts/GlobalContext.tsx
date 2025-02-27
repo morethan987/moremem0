@@ -34,7 +34,9 @@ const models = {
   "openai": "gpt-4o",
   "anthropic": "claude-3-haiku-20240307",
   "cohere": "command-r-plus",
-  "groq": "gemma2-9b-it"
+  "groq": "gemma2-9b-it",
+  "deepseek": "deepseek-chat",
+  "aliyun": "qwen-max-latest",
 }
 
 const getModel = (provider: string) => {
@@ -47,6 +49,10 @@ const getModel = (provider: string) => {
       return models.cohere;
     case "groq":
       return models.groq;
+    case "deepseek":
+      return models.deepseek;
+    case "aliyun":
+      return models.aliyun;
     default:
       return models.openai;
   }
@@ -67,6 +73,9 @@ const GlobalState = (props: any) => {
     provider: selectedProvider,
     mem0ApiKey: selectedMem0Key,
     apiKey: selectedOpenAIKey,
+    config: {
+      compatibility: 'compatible',
+    }
   });
 
   const clearConfiguration = () => {

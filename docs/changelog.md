@@ -4,6 +4,12 @@
 
 ### morethan987
 
+- 更新vercel-ai-sdk和chat-app的相关代码，能够使用国内供应商成功返回消息
+
+## 2025-02-26
+
+### morethan987
+
 - 实践证明`mem0\configs\vector_stores\qdrant.py`中的奇怪的命令确实是会影响服务器的启动：`QdrantClient: ClassVar[type] = QdrantClient`；并且暂时没有想到什么好的解决警告的方案
 
 - 更新服务器说明文档，添加了日志的查看方法

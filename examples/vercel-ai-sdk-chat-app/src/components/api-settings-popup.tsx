@@ -76,6 +76,8 @@ export default function ApiSettingsPopup(props: { isOpen: boolean, setIsOpen: Di
                   <SelectItem value="anthropic" className='rounded-3xl'>Anthropic</SelectItem>
                   <SelectItem value="cohere" className='rounded-3xl'>Cohere</SelectItem>
                   <SelectItem value="groq" className='rounded-3xl'>Groq</SelectItem>
+                  <SelectItem value="deepseek" className='rounded-3xl'>DeepSeek</SelectItem>
+                  <SelectItem value="aliyun" className='rounded-3xl'>Aliyun</SelectItem>
                 </SelectContent>
               </Select>
             </div>

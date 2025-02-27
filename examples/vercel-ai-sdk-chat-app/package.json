@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ai-sdk/deepseek": "^0.1.12",
+    "@ai-sdk/openai-compatible": "^0.1.12",
     "@mem0/vercel-ai-provider": "^0.0.7",
     "@radix-ui/react-avatar": "^1.1.1",
     "@radix-ui/react-dialog": "^1.1.2",
