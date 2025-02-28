@@ -11,8 +11,8 @@ export interface Provider {
 
 export const testConfig = {
   apiKey: process.env.MEM0_API_KEY,
-  userId: "mem0-ai-sdk-test-user-1134774",
-  deleteId: "",
+  userId: "test-sdk-morethan",
+  deleteId: "test-sdk-morethan",
   providers: [
     // {
     //   name: "openai",
@@ -70,28 +70,6 @@ export const testConfig = {
       apiKey: provider.apiKey,
     });
   },
-  fetchDeleteId: async function () {
-    const options = {
-      method: 'GET',
-      headers: {
-        Authorization: `Token ${this.apiKey}`,
-      },
-    };
-
-    try {
-      const response = await fetch('https://api.mem0.ai/v1/entities/', options);
-      const data = await response.json();
-      const entity = data.results.find((item: any) => item.name === this.userId);
-      if (entity) {
-        this.deleteId = entity.id;
-      } else {
-        console.error("No matching entity found for userId:", this.userId);
-      }
-    } catch (error) {
-      console.error("Error fetching deleteId:", error);
-      throw error;
-    }
-  },
   deleteUser: async function () {
     if (!this.deleteId) {
       console.error("deleteId is not set. Ensure fetchDeleteId is called first.");
@@ -106,7 +84,7 @@ export const testConfig = {
     };
 
     try {
-      const response = await fetch(`https://api.mem0.ai/v1/entities/user/${this.deleteId}/`, options);
+      const response = await fetch(`http://localhost:8000/memories?user_id=${this.deleteId}`, options);
       if (!response.ok) {
         throw new Error(`Failed to delete user: ${response.statusText}`);
       }

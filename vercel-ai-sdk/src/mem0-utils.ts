@@ -80,6 +80,7 @@ function convertMessagesToMem0Format(messages: LanguageModelV1Prompt) {
 
 const searchInternalMemories = async (query: string, config?: Mem0Config, top_k: number = 5)=> {
     tokenIsPresent(config);
+    console.log("************************************", config);
     const filters = {
       OR: [
         {
@@ -104,10 +105,11 @@ const searchInternalMemories = async (query: string, config?: Mem0Config, top_k:
     }
     const options = {
         method: 'POST',
-        headers: {Authorization: `Token ${(config&&config.mem0ApiKey) || (typeof process !== 'undefined' && process.env && process.env.MEM0_API_KEY) || ""}`, 'Content-Type': 'application/json'}, 
-        body: JSON.stringify({query, filters, top_k, version: "v2", ...org_project_filters}),
+        headers: {'Content-Type': 'application/json'}, 
+        body: JSON.stringify({ query, filters, top_k, version: "v2", ...org_project_filters }),
+        validate: false,
     };
-    const response  = await fetch('https://api.mem0.ai/v2/memories/search/', options);
+    const response  = await fetch('http://localhost:8000/search/', options);
     const data =  await response.json();
     return data;
 }
@@ -128,11 +130,12 @@ const updateMemories = async (messages: Array<Message>, config?: Mem0Config)=>{
     tokenIsPresent(config);
     const options = {
         method: 'POST',
-        headers: {Authorization: `Token ${(config&&config.mem0ApiKey) || (typeof process !== 'undefined' && process.env && process.env.MEM0_API_KEY) || ""}`, 'Content-Type': 'application/json'},
-        body: JSON.stringify({messages, ...config}),
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ messages, ...config }),
+        validate: false,
     };
 
-    const response  = await fetch('https://api.mem0.ai/v1/memories/', options);
+    const response  = await fetch('http://localhost:8000/memories/', options);
     const data =  await response.json();
     return data;
 }
@@ -141,20 +144,26 @@ const retrieveMemories = async (prompt: LanguageModelV1Prompt | string, config?:
     tokenIsPresent(config);
     const message = typeof prompt === 'string' ? prompt : flattenPrompt(prompt);
     const systemPrompt = "These are the memories I have stored. Give more weightage to the question by users and try to answer that first. You have to modify your answer based on the memories I have provided. If the memories are irrelevant you can ignore them. Also don't reply to this section of the prompt, or the memories, they are only for your reference. The System prompt starts after text System Message: \n\n";
-    const memories = await searchInternalMemories(message, config);
+  const memories = await searchInternalMemories(message, config);
+  console.log("Memories:", memories);
+    
+    // 首先检查memories是否有效
+    if(!memories || !memories.results || memories.results.length === 0){
+        console.log("No memories found or invalid memories format");
+        return "";
+    }
+    
     let memoriesText = "";
-    try{
-        // @ts-ignore
-        memoriesText = memories.map((memory: any)=>{
-            return `Memory: ${memory.memory}\n\n`;
+    try {
+        memoriesText = memories.results.map((memory: any) => {
+            const categories = memory.categories ? `(Categories: ${memory.categories.join(', ')})` : '';
+            return `Memory: ${memory.memory} ${categories}\n\n`;
         }).join("\n\n");
-    }catch(e){
-        console.error("Error while parsing memories");
-        // console.log(e);
+    } catch(e: any) {
+        console.error("Error while parsing memories:", e);
+        throw e; // 让错误向上传播，而不是静默返回空字符串
     }
-    if(memories.length === 0){
-      return "";
-    }
+    
     return `System Message: ${systemPrompt} ${memoriesText}`;
 }
 
