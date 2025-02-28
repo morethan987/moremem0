@@ -82,6 +82,7 @@ class SearchRequest(BaseModel):
     user_id: Optional[str] = None
     run_id: Optional[str] = None
     agent_id: Optional[str] = None
+    filters: Optional[Dict] = None
 
 
 @app.post("/configure", summary="Configure Mem0")
