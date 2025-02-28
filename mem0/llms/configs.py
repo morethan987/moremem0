@@ -25,6 +25,7 @@ class LlmConfig(BaseModel):
             "deepseek",
             "aliyun",
             "zhipu",
+            "xai",
         ):
             return v
         else:

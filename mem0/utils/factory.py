@@ -25,7 +25,8 @@ class LlmFactory:
         "gemini": "mem0.llms.gemini.GeminiLLM",
         "deepseek": "mem0.llms.deepseek.DeepSeekLLM",
         "aliyun": "mem0.llms.aliyun.AliyunLLM",
-        "zhipu": "mem0.llms.zhipu.ZhipuLLM"
+        "zhipu": "mem0.llms.zhipu.ZhipuLLM",
+        "xai": "mem0.llms.xai.XAILLM",
     }
 
     @classmethod
