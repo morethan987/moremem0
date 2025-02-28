@@ -27,7 +27,7 @@ export const AI_MODELS = {
   cohere: "command-r-plus",
   groq: "gemma2-9b-it",
   deepseek: "deepseek-chat",
-  aliyun: "qewn-max-latest",
+  aliyun: "qwen-max-2025-01-25",
 } as const;
 
 export type Provider = keyof typeof AI_MODELS; 

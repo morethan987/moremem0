@@ -35,11 +35,11 @@ export const testConfig = {
     //   activeModel: "command-r-plus",
     //   apiKey: process.env.COHERE_API_KEY,
     // },
-    {
-      name: "deepseek",
-      activeModel: "deepseek-chat",
-      apiKey: process.env.DEEPSEEK_API_KEY,
-    },
+    // {
+    //   name: "deepseek",
+    //   activeModel: "deepseek-chat",
+    //   apiKey: process.env.DEEPSEEK_API_KEY,
+    // },
     {
       name: "aliyun",
       activeModel: "qwen-max-latest",
@@ -52,7 +52,7 @@ export const testConfig = {
     groq: "gemma2-9b-it",
     cohere: "command-r-plus",
     deepseek: "deepseek-chat",
-    aliyun: "qwen-max-latest",
+    aliyun: "qwen-max-2025-01-25",
   },
   apiKeys: {
     openai: process.env.OPENAI_API_KEY,

@@ -2,6 +2,7 @@ import os
 from fastapi import FastAPI, HTTPException, Query, Path
 from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel, Field
+from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional, List, Any, Dict
 from mem0 import Memory
 from dotenv import load_dotenv
@@ -63,6 +64,14 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# 配置 CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # 允许的前端源
+    allow_credentials=True,
+    allow_methods=["*"],  # 允许所有HTTP方法
+    allow_headers=["*"],  # 允许所有请求头
+)
 
 class Message(BaseModel):
     role: str = Field(..., description="Role of the message (user or assistant).")

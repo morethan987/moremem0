@@ -19,9 +19,30 @@ interface UseChatReturn {
 }
 
 interface MemoryResponse {
+  results: {
+    id: string;
+    memory: string;
+    hash: string;
+    metadata: any;
+    score: number;
+    created_at: string;
+    updated_at: string | null;
+    categories: string[];
+    user_id: string;
+    relations?: any[];
+  }[];
+  relations: {
+    source: string;
+    relationship: string;
+    destination: string;
+  }[];
+}
+
+interface MemoryResult{
   id: string;
   memory: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
   categories: string[];
 }
 
@@ -56,10 +77,10 @@ export const useChat = ({ user, mem0ApiKey, openaiApiKey, provider }: UseChatPro
         mem0ApiKey,
       });
 
-      const newMemories = fetchedMemories.map((memory: MemoryResponse) => ({
+      const newMemories = fetchedMemories.results.map((memory: MemoryResult) => ({
         id: memory.id,
         content: memory.memory,
-        timestamp: memory.updated_at,
+        timestamp: memory.updated_at || memory.created_at,
         tags: memory.categories,
       }));
       setMemories(newMemories);

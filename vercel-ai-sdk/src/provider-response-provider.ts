@@ -104,6 +104,7 @@ class Mem0AITextGenerator {
         try {
             const flattenPromptResponse = flattenPrompt(prompt);
             const newPrompt = await retrieveMemories(prompt, config);
+            console.log("newPrompt", newPrompt);
 
             await updateMemories([
                 { role: "user", content: flattenPromptResponse },

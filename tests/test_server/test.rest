@@ -67,7 +67,7 @@ POST http://localhost:8000/search
 Content-Type: application/json
 
 {
-    "query": "What do you know about me?",
+    "query": "What do I like to eat?",
     "user_id": "morethan"
 }
 

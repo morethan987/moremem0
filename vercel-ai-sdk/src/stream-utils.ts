@@ -1,5 +1,5 @@
-async function filterStream(originalStream: ReadableStream) {
-    const reader = originalStream.getReader();
+async function filterStream(fullStream: ReadableStream) {
+    const reader = fullStream.getReader();
     const filteredStream = new ReadableStream({
         async start(controller) {
             while (true) {
@@ -10,11 +10,13 @@ async function filterStream(originalStream: ReadableStream) {
                 }
                 try {
                     const chunk = JSON.parse(value); 
-                    if (chunk.type !== "step-finish") {
+                    // 过滤掉 step-finish 和 step-start
+                    if (chunk.type !== "step-finish" && chunk.type !== "step-start") {
                         controller.enqueue(value);
                     }
                 } catch (error) {
-                    if (!(value.type==='step-finish')) {
+                    // 对于无法解析的值，检查其类型
+                    if (!(value.type === 'step-finish' || value.type === 'step-start')) {
                         controller.enqueue(value);
                     }
                 }

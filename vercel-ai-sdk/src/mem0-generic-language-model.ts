@@ -130,7 +130,7 @@ export class Mem0GenericLanguageModel implements LanguageModelV1 {
       const config: Mem0Config = {user_id, app_id, agent_id, run_id, org_name, project_name, mem0ApiKey: apiKey};
       const response = await model.streamText(messagesPrompts, config);
       // @ts-ignore
-      const filteredStream = await filterStream(response.originalStream);
+      const filteredStream = await filterStream(response.fullStream);
       return {
         // @ts-ignore
         stream: filteredStream,

@@ -80,22 +80,11 @@ function convertMessagesToMem0Format(messages: LanguageModelV1Prompt) {
 
 const searchInternalMemories = async (query: string, config?: Mem0Config, top_k: number = 5)=> {
     tokenIsPresent(config);
-    console.log("************************************", config);
     const filters = {
-      OR: [
-        {
           user_id: config&&config.user_id,
-        },
-        {
           app_id: config&&config.app_id,
-        },
-        {
           agent_id: config&&config.agent_id,
-        },
-        {
           run_id: config&&config.run_id,
-        },
-      ],
     };
     const org_project_filters = {
       org_id: config&&config.org_id,
@@ -145,7 +134,6 @@ const retrieveMemories = async (prompt: LanguageModelV1Prompt | string, config?:
     const message = typeof prompt === 'string' ? prompt : flattenPrompt(prompt);
     const systemPrompt = "These are the memories I have stored. Give more weightage to the question by users and try to answer that first. You have to modify your answer based on the memories I have provided. If the memories are irrelevant you can ignore them. Also don't reply to this section of the prompt, or the memories, they are only for your reference. The System prompt starts after text System Message: \n\n";
   const memories = await searchInternalMemories(message, config);
-  console.log("Memories:", memories);
     
     // 首先检查memories是否有效
     if(!memories || !memories.results || memories.results.length === 0){
