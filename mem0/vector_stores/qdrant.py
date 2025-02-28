@@ -140,14 +140,13 @@ class Qdrant(VectorStoreBase):
             list: Search results.
         """
         query_filter = self._create_filter(filters) if filters else None
-        # 这个方法马上就要被废弃了，等待官方更新
-        hits = self.client.search(
+        hits = self.client.query_points(
             collection_name=self.collection_name,
-            query_vector=query,
+            query=query,
             query_filter=query_filter,
             limit=limit,
         )
-        return hits
+        return hits.points
 
     def delete(self, vector_id: int):
         """
