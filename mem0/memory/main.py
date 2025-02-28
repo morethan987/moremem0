@@ -93,8 +93,8 @@ class Memory(MemoryBase):
                 filters (dict, optional): Filters to apply to the search for pre-existing memories. Defaults to None.
                 prompt (str, optional): Prompt to use for memory deduction. Defaults to None.
                 graph_prompt (str, optional): Prompt to use for graph memory deduction. Defaults to None.
-                includes (str, optional): Prompt to include specified info. TODO
-                excludes (str, optional): Prompt to exclude specified info. TODO
+                includes (str, optional): Prompt to include specified info.
+                excludes (str, optional): Prompt to exclude specified info.
 
         Returns:
             dict: A dictionary containing the result of the memory addition operation.
