@@ -10,4 +10,8 @@ export default defineConfig({
       buffer: 'buffer'
     },
   },
+  server: {
+    allowedHosts: ["frp-put.com"],
+    host: '0.0.0.0'
+  }
 })

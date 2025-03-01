@@ -28,14 +28,14 @@ DEFAULT_CONFIG = {
             "embedding_model_dims": 1024
         }
     },
-    "graph_store": {
-        "provider": "neo4j",
-        "config": {
-            "url": f"neo4j://{NEO4J_HOST}:{NEO4J_PORT}",
-            "username": "neo4j",
-            "password": "mo123456789"
-        }
-    },
+    # "graph_store": {
+    #     "provider": "neo4j",
+    #     "config": {
+    #         "url": f"neo4j://{NEO4J_HOST}:{NEO4J_PORT}",
+    #         "username": "neo4j",
+    #         "password": "mo123456789"
+    #     }
+    # },
     "llm": {
         "provider": "aliyun",
         "config": {
@@ -67,7 +67,7 @@ app = FastAPI(
 # 配置 CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # 允许的前端源
+    allow_origins=["http://localhost:5173", "https://frp-put.com:42344"],  # 允许的前端源
     allow_credentials=True,
     allow_methods=["*"],  # 允许所有HTTP方法
     allow_headers=["*"],  # 允许所有请求头
