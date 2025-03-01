@@ -29,7 +29,7 @@ async function runTests(memory: Memory) {
     console.log("\nAdding a single memory...");
     const result1 = await memory.add(
       "Hi, my name is John and I am a software engineer.",
-      "user123",
+      {userId: "user123"},
     );
     console.log("Added memory:", result1);
 
@@ -40,7 +40,7 @@ async function runTests(memory: Memory) {
         { role: "user", content: "What is your favorite city?" },
         { role: "assistant", content: "I love Paris, it is my favorite city." },
       ],
-      "user123",
+      {userId: "user123"},
     );
     console.log("Added messages:", result2);
 
@@ -53,7 +53,7 @@ async function runTests(memory: Memory) {
           content: "I love New York, it is my favorite city.",
         },
       ],
-      "user123",
+      {userId: "user123"},
     );
     console.log("Updated messages:", result3);
 
@@ -75,14 +75,14 @@ async function runTests(memory: Memory) {
 
     // Get all memories
     console.log("\nGetting all memories...");
-    const allMemories = await memory.getAll("user123");
+    const allMemories = await memory.getAll({userId: "user123"});
     console.log("All memories:", allMemories);
 
     // Search for memories
     console.log("\nSearching memories...");
     const searchResult = await memory.search(
       "What do you know about Paris?",
-      "user123",
+      {userId: "user123"},
     );
     console.log("Search results:", searchResult);
 

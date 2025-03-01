@@ -1,5 +1,8 @@
 import { OpenAIEmbedder } from "../embeddings/openai";
+import { SiliconFlowEmbedder } from "../embeddings/siliconflow";
 import { OpenAILLM } from "../llms/openai";
+import { DeepSeekLLM } from "../llms/deepseek";
+import { AliyunLLM } from "../llms/aliyun";
 import { OpenAIStructuredLLM } from "../llms/openai_structured";
 import { AnthropicLLM } from "../llms/anthropic";
 import { GroqLLM } from "../llms/groq";
@@ -16,6 +19,8 @@ export class EmbedderFactory {
     switch (provider.toLowerCase()) {
       case "openai":
         return new OpenAIEmbedder(config);
+      case "siliconflow":
+        return new SiliconFlowEmbedder(config);
       default:
         throw new Error(`Unsupported embedder provider: ${provider}`);
     }
@@ -33,6 +38,10 @@ export class LLMFactory {
         return new AnthropicLLM(config);
       case "groq":
         return new GroqLLM(config);
+      case "deepseek":
+        return new DeepSeekLLM(config);
+      case "aliyun":
+        return new AliyunLLM(config);
       default:
         throw new Error(`Unsupported LLM provider: ${provider}`);
     }

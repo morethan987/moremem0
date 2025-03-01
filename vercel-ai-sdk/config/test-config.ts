@@ -42,7 +42,7 @@ export const testConfig = {
     // },
     {
       name: "aliyun",
-      activeModel: "qwen-max-latest",
+      activeModel: "qwen-max-2025-01-25",
       apiKey: process.env.ALIYUN_API_KEY,
     },
   ],

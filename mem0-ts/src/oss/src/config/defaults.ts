@@ -3,10 +3,10 @@ import { MemoryConfig } from "../types";
 export const DEFAULT_MEMORY_CONFIG: MemoryConfig = {
   version: "v1.1",
   embedder: {
-    provider: "openai",
+    provider: "siliconflow",
     config: {
-      apiKey: process.env.OPENAI_API_KEY || "",
-      model: "text-embedding-3-small",
+      apiKey: process.env.SILICONFLOW_API_KEY || "",
+      model: "Pro/BAAI/bge-m3",
     },
   },
   vectorStore: {
@@ -17,10 +17,10 @@ export const DEFAULT_MEMORY_CONFIG: MemoryConfig = {
     },
   },
   llm: {
-    provider: "openai",
+    provider: "aliyun",
     config: {
-      apiKey: process.env.OPENAI_API_KEY || "",
-      model: "gpt-4-turbo-preview",
+      apiKey: process.env.ALIYUN_API_KEY || "",
+      model: "qwen-max-2025-01-25",
     },
   },
   historyDbPath: "memory.db",

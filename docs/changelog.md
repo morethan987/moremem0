@@ -6,6 +6,10 @@
 
 - 官方更新跟进
 
+- ts工具包中添加siliconflow嵌入模型供应商；TODO接入大模型供应商：阿里云+deepseek；
+
+- 参数传递修正`mem0-ts\src\oss\examples\basic.ts`
+
 ## 2025-02-28
 
 ### morethan987
