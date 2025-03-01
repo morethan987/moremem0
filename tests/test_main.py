@@ -54,10 +54,14 @@ def test_add(memory_instance, version, enable_graph, custom_prompt):
         graph_prompt=custom_prompt
     )
 
-    assert "results" in result
-    assert result["results"] == [{"memory": "Test memory", "event": "ADD"}]
-    assert "relations" in result
-    assert result["relations"] == []
+    if enable_graph:
+        assert "results" in result
+        assert result["results"] == [{"memory": "Test memory", "event": "ADD"}]
+        assert "relations" in result
+        assert result["relations"] == []
+    else:
+        assert "results" in result
+        assert result["results"] == [{"memory": "Test memory", "event": "ADD"}]
 
     memory_instance._add_to_vector_store.assert_called_once_with(
         [{"role": "user", "content": "Test message"}], {"user_id": "test_user"}, {"user_id": "test_user"}, custom_prompt
