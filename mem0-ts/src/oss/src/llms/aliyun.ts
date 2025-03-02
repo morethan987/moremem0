@@ -3,19 +3,22 @@ import { LLM, LLMResponse } from "./base";
 import { LLMConfig, Message } from "../types";
 
 export class AliyunLLM implements LLM {
-  private openai: OpenAI;
+  private aliyun: OpenAI;
   private model: string;
 
   constructor(config: LLMConfig) {
-    this.openai = new OpenAI({ apiKey: config.apiKey });
-    this.model = config.model || "gpt-4-turbo-preview";
+    this.aliyun = new OpenAI({
+      apiKey: config.apiKey,
+      baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    });
+    this.model = config.model || "qwen-max-2025-01-25";
   }
 
   async generateResponse(
     messages: Message[],
     responseFormat?: { type: string },
   ): Promise<string> {
-    const completion = await this.openai.chat.completions.create({
+    const completion = await this.aliyun.chat.completions.create({
       messages: messages.map((msg) => ({
         role: msg.role as "system" | "user" | "assistant",
         content: msg.content,
@@ -27,7 +30,7 @@ export class AliyunLLM implements LLM {
   }
 
   async generateChat(messages: Message[]): Promise<LLMResponse> {
-    const completion = await this.openai.chat.completions.create({
+    const completion = await this.aliyun.chat.completions.create({
       messages: messages.map((msg) => ({
         role: msg.role as "system" | "user" | "assistant",
         content: msg.content,

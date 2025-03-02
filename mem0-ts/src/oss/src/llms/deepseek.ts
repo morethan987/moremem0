@@ -7,8 +7,11 @@ export class DeepSeekLLM implements LLM {
   private model: string;
 
   constructor(config: LLMConfig) {
-    this.openai = new OpenAI({ apiKey: config.apiKey });
-    this.model = config.model || "gpt-4-turbo-preview";
+    this.openai = new OpenAI({
+      apiKey: config.apiKey,
+      baseURL: "https://api.deepseek.com"
+     });
+    this.model = config.model || "deepseek-chat";
   }
 
   async generateResponse(

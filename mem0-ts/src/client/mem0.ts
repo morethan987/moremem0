@@ -43,13 +43,13 @@ export default class MemoryClient {
 
   _validateApiKey(): any {
     if (!this.apiKey) {
-      throw new Error("Mem0 API key is required");
+      throw new Error("API key is required");
     }
     if (typeof this.apiKey !== "string") {
-      throw new Error("Mem0 API key must be a string");
+      throw new Error("API key must be a string");
     }
     if (this.apiKey.trim() === "") {
-      throw new Error("Mem0 API key cannot be empty");
+      throw new Error("API key cannot be empty");
     }
   }
 
@@ -206,7 +206,7 @@ export default class MemoryClient {
 
     const payload = this._preparePayload(messages, options);
     const response = await this._fetchWithErrorHandling(
-      `${this.host}/v1/memories/`,
+      `${this.host}/memories/`,
       {
         method: "POST",
         headers: this.headers,
@@ -222,7 +222,7 @@ export default class MemoryClient {
       text: message,
     };
     const response = await this._fetchWithErrorHandling(
-      `${this.host}/v1/memories/${memoryId}/`,
+      `${this.host}/memories/${memoryId}/`,
       {
         method: "PUT",
         headers: this.headers,
@@ -234,7 +234,7 @@ export default class MemoryClient {
 
   async get(memoryId: string): Promise<Memory> {
     return this._fetchWithErrorHandling(
-      `${this.host}/v1/memories/${memoryId}/`,
+      `${this.host}/memories/${memoryId}/`,
       {
         headers: this.headers,
       },
@@ -267,8 +267,8 @@ export default class MemoryClient {
 
     if (api_version === "v2") {
       let url = paginated_response
-        ? `${this.host}/v2/memories/?${appendedParams}`
-        : `${this.host}/v2/memories/`;
+        ? `${this.host}/memories/?${appendedParams}`
+        : `${this.host}/memories/`;
       return this._fetchWithErrorHandling(url, {
         method: "POST",
         headers: this.headers,
@@ -303,7 +303,7 @@ export default class MemoryClient {
       if (payload.project_name) delete payload.project_name;
     }
     const endpoint =
-      api_version === "v2" ? "/v2/memories/search/" : "/v1/memories/search/";
+      api_version === "v2" ? "/memories/search/" : "/v1/memories/search/";
     const response = await this._fetchWithErrorHandling(
       `${this.host}${endpoint}`,
       {
@@ -317,7 +317,7 @@ export default class MemoryClient {
 
   async delete(memoryId: string): Promise<{ message: string }> {
     return this._fetchWithErrorHandling(
-      `${this.host}/v1/memories/${memoryId}/`,
+      `${this.host}/memories/${memoryId}/`,
       {
         method: "DELETE",
         headers: this.headers,
@@ -342,7 +342,7 @@ export default class MemoryClient {
     // @ts-ignore
     const params = new URLSearchParams(this._prepareParams(options));
     const response = await this._fetchWithErrorHandling(
-      `${this.host}/v1/memories/?${params}`,
+      `${this.host}/memories/?${params}`,
       {
         method: "DELETE",
         headers: this.headers,
@@ -353,7 +353,7 @@ export default class MemoryClient {
 
   async history(memoryId: string): Promise<Array<MemoryHistory>> {
     const response = await this._fetchWithErrorHandling(
-      `${this.host}/v1/memories/${memoryId}/history/`,
+      `${this.host}/memories/${memoryId}/history/`,
       {
         headers: this.headers,
       },
@@ -379,7 +379,7 @@ export default class MemoryClient {
     // @ts-ignore
     const params = new URLSearchParams(options);
     const response = await this._fetchWithErrorHandling(
-      `${this.host}/v1/entities/?${params}`,
+      `${this.host}/entities/?${params}`,
       {
         headers: this.headers,
       },
@@ -392,7 +392,7 @@ export default class MemoryClient {
     entity: { type: string } = { type: "user" },
   ): Promise<{ message: string }> {
     const response = await this._fetchWithErrorHandling(
-      `${this.host}/v1/entities/${entity.type}/${entityId}/`,
+      `${this.host}/entities/${entity.type}/${entityId}/`,
       {
         method: "DELETE",
         headers: this.headers,
@@ -419,7 +419,7 @@ export default class MemoryClient {
         if (options.org_name) delete options.org_name;
         if (options.project_name) delete options.project_name;
       }
-      await this.client.delete(`/v1/entities/${entity.type}/${entity.id}/`, {
+      await this.client.delete(`/entities/${entity.type}/${entity.id}/`, {
         params: options,
       });
     }
@@ -432,7 +432,7 @@ export default class MemoryClient {
       text: memory.text,
     }));
     const response = await this._fetchWithErrorHandling(
-      `${this.host}/v1/batch/`,
+      `${this.host}/batch/`,
       {
         method: "PUT",
         headers: this.headers,
@@ -447,7 +447,7 @@ export default class MemoryClient {
       memory_id: memory,
     }));
     const response = await this._fetchWithErrorHandling(
-      `${this.host}/v1/batch/`,
+      `${this.host}/batch/`,
       {
         method: "DELETE",
         headers: this.headers,
