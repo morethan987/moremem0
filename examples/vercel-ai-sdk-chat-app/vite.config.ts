@@ -16,7 +16,7 @@ export default defineConfig({
   proxy: {
     '/api': {
       // target: 'https://frp-gap.com:31663',
-      target: 'http://localhost:8000',
+      target: 'https://frp-gap.com:31663',
       changeOrigin: true,
       rewrite: (path) => path.replace(/^\/api/, ""),
       secure: false
