@@ -67,7 +67,7 @@ app = FastAPI(
 # 配置 CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "https://frp-put.com:42344"],  # 允许的前端源
+    allow_origins=["http://localhost:5173", "https://frp-put.com:42344", "http://localhost:4173"],  # 允许的前端源
     allow_credentials=True,
     allow_methods=["*"],  # 允许所有HTTP方法
     allow_headers=["*"],  # 允许所有请求头

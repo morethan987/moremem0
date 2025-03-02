@@ -12,6 +12,15 @@ export default defineConfig({
   },
   server: {
     allowedHosts: ["frp-put.com"],
-    host: '0.0.0.0'
+  host: '0.0.0.0',
+  proxy: {
+    '/api': {
+      // target: 'https://frp-gap.com:31663',
+      target: 'http://localhost:8000',
+      changeOrigin: true,
+      rewrite: (path) => path.replace(/^\/api/, ""),
+      secure: false
+    }
   }
+}
 })
