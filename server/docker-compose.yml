@@ -25,14 +25,23 @@ services:
       - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
     depends_on:
       - app
     networks:
       - mem0-network
     environment:
-      - NGINX_HOST=localhost
+      - NGINX_HOST=moremem.xyz
       - NGINX_PORT=80
+      
+  # certbot:
+  #   image: certbot/certbot:latest
+  #   volumes:
+  #     - ./certbot/conf:/etc/letsencrypt
+  #     - ./certbot/www:/var/www/certbot
+  #   depends_on:
+  #     - nginx
 
   neo4j:
     image: neo4j:5.26.2
