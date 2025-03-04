@@ -1,10 +1,16 @@
 @memory_id = your-memory-id-here
 
+### 获取所有记忆
+GET http://localhost:80/memories?user_id=morethan
+
+### 删除用户的所有记忆
+DELETE http://localhost:80/memories?user_id=morethan
+
 ### 获取文档
-GET http://localhost:8000/docs
+GET http://localhost:80/docs
 
 ### 配置内存实例
-POST http://localhost:8000/configure
+POST http://localhost:80/configure
 Content-Type: application/json
 
 {
@@ -46,7 +52,7 @@ Content-Type: application/json
 }
 
 ### 添加记忆
-POST http://localhost:8000/memories
+POST http://localhost:80/memories
 Content-Type: application/json
 
 {
@@ -59,11 +65,8 @@ Content-Type: application/json
     "user_id": "morethan"
 }
 
-### 获取所有记忆
-GET http://localhost:8000/memories?user_id=morethan
-
 ### 根据关键词搜索记忆
-POST http://localhost:8000/search
+POST http://localhost:80/search
 Content-Type: application/json
 
 {
@@ -72,10 +75,10 @@ Content-Type: application/json
 }
 
 ### 获取指定记忆的历史
-GET http://localhost:8000/memories/{{memory_id}}/history
+GET http://localhost:80/memories/{{memory_id}}/history
 
 ### 更新指定记忆
-PUT http://localhost:8000/memories/{{memory_id}}
+PUT http://localhost:80/memories/{{memory_id}}
 Content-Type: application/json
 
 {
@@ -83,10 +86,7 @@ Content-Type: application/json
 }
 
 ### 删除指定记忆
-DELETE http://localhost:8000/memories/{{memory_id}}
-
-### 删除用户的所有记忆
-DELETE http://localhost:8000/memories?user_id=morethan
+DELETE http://localhost:80/memories/{{memory_id}}
 
 ### 重置所有记忆
-POST http://localhost:8000/reset
+POST http://localhost:80/reset
