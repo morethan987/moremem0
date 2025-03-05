@@ -4,6 +4,12 @@
 
 ### morethan987
 
+- 官方更新跟进：mem0-demo
+
+## 2025-03-04
+
+### morethan987
+
 - 官方更新：vertexAI 支持和 supadatabase 支持
 
 ## 2025-03-03
