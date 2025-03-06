@@ -10,6 +10,8 @@
 
 - 官方debug：Fix Embedding Dimension Parameter Not Being Passed
 
+- 阿里云模型新增toolCall
+
 ## 2025-03-05
 
 ### morethan987
