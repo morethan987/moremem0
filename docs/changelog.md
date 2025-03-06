@@ -8,6 +8,8 @@
 
 - 官方重大更新：ts库支持图数据库
 
+- 官方debug：Fix Embedding Dimension Parameter Not Being Passed
+
 ## 2025-03-05
 
 ### morethan987

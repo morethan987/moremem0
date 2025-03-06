@@ -18,7 +18,7 @@ class GoogleGenAIEmbedding(EmbeddingBase):
 
         genai.configure(api_key=api_key)
 
-    def embed(self, text, memory_action:Optional[Literal["add", "search", "update"]] = None):
+    def embed(self, text, memory_action: Optional[Literal["add", "search", "update"]] = None):
         """
         Get the embedding for the given text using Google Generative AI.
         Args:
@@ -28,5 +28,5 @@ class GoogleGenAIEmbedding(EmbeddingBase):
             list: The embedding vector.
         """
         text = text.replace("\n", " ")
-        response = genai.embed_content(model=self.config.model, content=text)
+        response = genai.embed_content(model=self.config.model, content=text, output_dimensionality=self.config.embedding_dims)
         return response["embedding"]
