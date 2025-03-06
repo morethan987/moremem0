@@ -20,6 +20,7 @@ class VectorStoreConfig(BaseModel):
         "azure_ai_search": "AzureAISearchConfig",
         "redis": "RedisDBConfig",
         "elasticsearch": "ElasticsearchConfig",
+        "vertex_ai_vector_search": "GoogleMatchingEngineConfig",
         "opensearch": "OpenSearchConfig",
         "supabase": "SupabaseConfig",
     }
