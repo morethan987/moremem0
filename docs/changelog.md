@@ -6,6 +6,8 @@
 
 - 官方更新：支持Google Vector Search
 
+- 官方重大更新：ts库支持图数据库
+
 ## 2025-03-05
 
 ### morethan987
