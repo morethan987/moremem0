@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 from mem0.embeddings.configs import EmbedderConfig
 from mem0.graphs.configs import GraphStoreConfig
 from mem0.llms.configs import LlmConfig
-from mem0.memory.setup import mem0_dir
+from mem0.memory.setup import moremem_dir
 from mem0.vector_stores.configs import VectorStoreConfig
 
 
@@ -39,7 +39,7 @@ class MemoryConfig(BaseModel):
     )
     history_db_path: str = Field(
         description="Path to the history database",
-        default=os.path.join(mem0_dir, "history.db"),
+        default=os.path.join(moremem_dir, "history.db"),
     )
     graph_store: GraphStoreConfig = Field(
         description="Configuration for the graph",

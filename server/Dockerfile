@@ -3,6 +3,10 @@ FROM python:3.12-slim
 # 设置工作目录为/app/server，这样main.py就在正确的位置
 WORKDIR /app/server
 
+# 配置pip源
+# 使用腾讯云镜像源，注意这里是内网域名
+RUN pip config set global.index-url https://mirrors.tencentyun.com/pypi/simple && pip config set global.trusted-host mirrors.tencentyun.com
+
 # 复制并安装requirements
 COPY server/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt

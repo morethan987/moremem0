@@ -25,4 +25,4 @@ Here I prepare a test file for you: `tests\test_server\test.rest`. To use it, yo
 
 When the container is running, type `docker exec -it server-app-1 /bin/bash` into your shell. You can use the command `docker ps` to list all the running container.
 
-Then you will enter a normal Linux terminal window. The log is stored in the `~/.mem0` named `history.db`. The only thing you should do is to copy it and paste into `/app/log`. The file will appeare in the `log` folder in your root direction.
+Then you will enter a normal Linux terminal window. The log is stored in the `~/.moremem` named `history.db`. The only thing you should do is to copy it and paste into `/app/log`. The file will appeare in the `log` folder in your root direction.

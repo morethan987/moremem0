@@ -1,13 +1,14 @@
 @memory_id = your-memory-id-here
+@user_id = morethan
 
 ### 获取所有记忆
-GET http://localhost:80/memories?user_id=morethan
+GET https://moremem.xyz/memories?user_id={{user_id}}
 
 ### 删除用户的所有记忆
-DELETE http://localhost:80/memories?user_id=morethan
+DELETE http://localhost:80/memories?user_id={{user_id}}
 
 ### 获取文档
-GET http://localhost:80/docs
+GET http://moremem.xyz/docs
 
 ### 配置内存实例
 POST http://localhost:80/configure

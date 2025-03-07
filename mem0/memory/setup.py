@@ -4,12 +4,12 @@ import uuid
 
 # Set up the directory path
 home_dir = os.path.expanduser("~")
-mem0_dir = os.environ.get("MEM0_DIR") or os.path.join(home_dir, ".mem0")
-os.makedirs(mem0_dir, exist_ok=True)
+moremem_dir = os.environ.get("MOREMEM_DIR") or os.path.join(home_dir, ".moremem")
+os.makedirs(moremem_dir, exist_ok=True)
 
 
 def setup_config():
-    config_path = os.path.join(mem0_dir, "config.json")
+    config_path = os.path.join(moremem_dir, "config.json")
     if not os.path.exists(config_path):
         user_id = str(uuid.uuid4())
         config = {"user_id": user_id}
@@ -18,7 +18,7 @@ def setup_config():
 
 
 def get_user_id():
-    config_path = os.path.join(mem0_dir, "config.json")
+    config_path = os.path.join(moremem_dir, "config.json")
     if not os.path.exists(config_path):
         return "anonymous_user"
 

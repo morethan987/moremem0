@@ -12,6 +12,12 @@
 
 - 阿里云模型新增toolCall
 
+- 官方更新：ts库支持多模态输入
+
+- 配置Ubuntu的docker-compose配置文件
+
+- 尝试配置服务器的SSL，但没有成功，服务器把certbot的访问请求给拒绝了😢
+
 ## 2025-03-05
 
 ### morethan987
