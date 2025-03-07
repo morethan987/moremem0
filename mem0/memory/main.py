@@ -239,15 +239,23 @@ class Memory(MemoryBase):
             retrieved_old_memory[idx]["id"] = str(idx)
 
         function_calling_prompt = get_update_memory_messages(retrieved_old_memory, new_retrieved_facts)
-        new_memories_with_actions = self.llm.generate_response(
-            messages=[{"role": "user", "content": function_calling_prompt}],
-            response_format={"type": "json_object"},
-        )
+
+        try:
+            new_memories_with_actions = self.llm.generate_response(
+                messages=[{"role": "user", "content": function_calling_prompt}],
+                response_format={"type": "json_object"},
+            )
+        except Exception as e:
+            logging.error(f"Error in new_memories_with_actions: {e}")
+            new_memories_with_actions = []
 
         # 从原始响应中解析出记忆
-        new_memories_with_actions = remove_code_blocks(new_memories_with_actions)
-        new_memories_with_actions = json.loads(new_memories_with_actions)
-        logger.debug(f"the initial new_memories_with_actions: {new_memories_with_actions}\n")
+        try:
+            new_memories_with_actions = remove_code_blocks(new_memories_with_actions)
+            new_memories_with_actions = json.loads(new_memories_with_actions)
+        except Exception as e:
+            logging.error(f"Invalid JSON response: {e}")
+            new_memories_with_actions = []
         
         # 过滤出ADD类型的记忆
         add_memories = [mem for mem in new_memories_with_actions["memory"] if mem["event"] == "ADD"]
@@ -259,9 +267,12 @@ class Memory(MemoryBase):
                 messages=[{"role": "user", "content": categories_generating_prompt}],
                 response_format={"type": "json_object"},
             )
-            memories_with_categories = remove_code_blocks(memories_with_categories)
-            memories_with_categories = json.loads(memories_with_categories)
-            logger.debug(f"add only memories: {memories_with_categories}\n")
+            try:
+                memories_with_categories = remove_code_blocks(memories_with_categories)
+                memories_with_categories = json.loads(memories_with_categories)
+            except Exception as e:
+                logging.error(f"Invalid JSON response: {e}")
+                memories_with_categories = []
             
             # 将categories合并回原始记忆中
             add_memories_dict = {mem["text"]: mem for mem in add_memories}
@@ -276,43 +287,46 @@ class Memory(MemoryBase):
         returned_memories = []
         logger.debug(f"the final new_memories_with_actions: {new_memories_with_actions}\n")
         try:
-            for resp in new_memories_with_actions["memory"]:
+            for resp in new_memories_with_actions.get("memory", []):
                 logger.info(f"the element in {resp}\n")
                 try:
-                    if resp["event"] == "ADD":
+                    if not resp.get("text"):
+                        logging.info("Skipping memory entry because of empty `text` field.")
+                        continue
+                    elif resp.get("event") == "ADD":
                         memory_id = self._create_memory(
-                            data=resp["text"], existing_embeddings=new_message_embeddings, metadata=metadata, categories=resp["categories"]
+                            data=resp.get("text"), existing_embeddings=new_message_embeddings, metadata=metadata, categories=resp.get("categories")
                         )
                         returned_memories.append(
                             {
                                 "id": memory_id,
-                                "memory": resp["text"],
-                                "event": resp["event"],
-                                "categories": resp["categories"],
+                                "memory": resp.get("text"),
+                                "event": resp.get("event"),
+                                "categories": resp.get("categories"),
                             }
                         )
-                    elif resp["event"] == "UPDATE":
+                    elif resp.get("event") == "UPDATE":
                         self._update_memory(
-                            memory_id=temp_uuid_mapping[resp["id"]],
-                            data=resp["text"],
+                            memory_id=temp_uuid_mapping[resp.get("id")],
+                            data=resp.get("text"),
                             existing_embeddings=new_message_embeddings,
                             metadata=metadata,
                         )
                         returned_memories.append(
                             {
-                                "id": temp_uuid_mapping[resp["id"]],
-                                "memory": resp["text"],
-                                "event": resp["event"],
-                                "previous_memory": resp["old_memory"],
+                                "id": temp_uuid_mapping[resp.get("id")],
+                                "memory": resp.get("text"),
+                                "event": resp.get("event"),
+                                "previous_memory": resp.get("old_memory"),
                             }
                         )
-                    elif resp["event"] == "DELETE":
-                        self._delete_memory(memory_id=temp_uuid_mapping[resp["id"]])
+                    elif resp.get("event") == "DELETE":
+                        self._delete_memory(memory_id=temp_uuid_mapping[resp.get("id")])
                         returned_memories.append(
                             {
-                                "id": temp_uuid_mapping[resp["id"]],
-                                "memory": resp["text"],
-                                "event": resp["event"],
+                                "id": temp_uuid_mapping[resp.get("id")],
+                                "memory": resp.get("text"),
+                                "event": resp.get("event"),
                             }
                         )
                 except Exception as e:
