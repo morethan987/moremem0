@@ -58,8 +58,8 @@ DEFAULT_CONFIG = {
 MEMORY_INSTANCE = Memory.from_config(DEFAULT_CONFIG)
 
 app = FastAPI(
-    title="Mem0 REST APIs",
-    description="A REST API for managing and searching memories for your AI Agents and Apps.",
+    title="测试页面",
+    description="这是一个临时的测试页面，有待后期开发",
     version="1.0.0",
 )
 
@@ -220,7 +220,7 @@ def reset_memory():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/", summary="Redirect to the OpenAPI documentation", include_in_schema=False)
+@app.get("/", summary="Redirect to the documentation", include_in_schema=False)
 def home():
-    """Redirect to the OpenAPI documentation."""
+    """Redirect to the documentation."""
     return RedirectResponse(url='/docs')
