@@ -23,6 +23,7 @@ class VectorStoreConfig(BaseModel):
         "vertex_ai_vector_search": "GoogleMatchingEngineConfig",
         "opensearch": "OpenSearchConfig",
         "supabase": "SupabaseConfig",
+        "weaviate": "WeaviateConfig",
     }
 
     @model_validator(mode="after")
