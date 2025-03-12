@@ -8,6 +8,8 @@
 
 - 官方更新：WeaviateDB 支持
 
+- 官方更新：更新demo
+
 ## 2025-03-10
 
 ### morethan987
