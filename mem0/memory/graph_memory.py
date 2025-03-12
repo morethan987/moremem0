@@ -10,7 +10,7 @@ except ImportError:
 try:
     from langchain_neo4j import Neo4jGraph
 except ImportError:
-    raise ImportError("langchain_community is not installed. Please install it using pip install langchain-community")
+    raise ImportError("langchain_neo4j is not installed. Please install it using pip install langchain-neo4j")
 
 try:
     from rank_bm25 import BM25Okapi
