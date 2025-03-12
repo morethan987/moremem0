@@ -12,6 +12,8 @@
 
 - 官方更新：openai inbuilt tools
 
+- 新增嵌入模型供应商：阿里云
+
 ## 2025-03-10
 
 ### morethan987

@@ -22,6 +22,8 @@ class BaseEmbedderConfig(ABC):
         openai_base_url: Optional[str] = None,
         # SiliconFlow specific
         siliconflow_base_url: Optional[str] = None,
+        # Aliyun specific
+        aliyun_base_url: Optional[str] = None,
         # Huggingface specific
         model_kwargs: Optional[dict] = None,
         # AzureOpenAI specific
@@ -48,6 +50,10 @@ class BaseEmbedderConfig(ABC):
         :type model_kwargs: Optional[Dict[str, Any]], defaults a dict inside init
         :param openai_base_url: Openai base URL to be use, defaults to "https://api.openai.com/v1"
         :type openai_base_url: Optional[str], optional
+        :param siliconflow_base_url: SiliconFlow base URL to be use, defaults to "https://api.siliconflow.cn/v1/embeddings"
+        :type siliconflow_base_url: Optional[str], optional
+        :param aliyun_base_url: Aliyun base URL to be use, defaults to "https://dashscope.aliyuncs.com/compatible-mode/v1"
+        :type aliyun_base_url: Optional[str], optional
         :param azure_kwargs: key-value arguments for the AzureOpenAI embedding model, defaults a dict inside init
         :type azure_kwargs: Optional[Dict[str, Any]], defaults a dict inside init
         :param http_client_proxies: The proxy server settings used to create self.http_client, defaults to None
@@ -75,6 +81,9 @@ class BaseEmbedderConfig(ABC):
 
         # SiliconFlow specific
         self.siliconflow_base_url = siliconflow_base_url
+
+        # Aliyun specific
+        self.aliyun_base_url = aliyun_base_url
 
         # Huggingface specific
         self.model_kwargs = model_kwargs or {}

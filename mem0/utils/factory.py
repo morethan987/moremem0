@@ -49,7 +49,8 @@ class EmbedderFactory:
         "gemini": "mem0.embeddings.gemini.GoogleGenAIEmbedding",
         "vertexai": "mem0.embeddings.vertexai.VertexAIEmbedding",
         "together": "mem0.embeddings.together.TogetherEmbedding",
-        "siliconflow": "mem0.embeddings.siliconflow.SiliconFlowEmbedding"
+        "siliconflow": "mem0.embeddings.siliconflow.SiliconFlowEmbedding",
+        "aliyun": "mem0.embeddings.aliyun.AliyunEmbedding"
     }
 
     @classmethod

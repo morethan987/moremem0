@@ -14,7 +14,7 @@ class SiliconFlowEmbedding(EmbeddingBase):
         self.config.embedding_dims = self.config.embedding_dims or 1024
 
         self.api_key = self.config.api_key or os.getenv("SILICONFLOW_API_KEY")
-        self.base_url = self.config.siliconflow_base_url or os.getenv("SILICONFLOW_API_BASE")
+        self.base_url = self.config.siliconflow_base_url or os.getenv("SILICONFLOW_API_BASE") or "https://api.siliconflow.cn/v1/embeddings"
 
     def embed(self, text):
         """
