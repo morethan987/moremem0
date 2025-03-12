@@ -10,6 +10,8 @@
 
 - 官方更新：更新demo
 
+- 官方更新：openai inbuilt tools
+
 ## 2025-03-10
 
 ### morethan987
