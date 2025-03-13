@@ -1,6 +1,7 @@
 import os
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from typing import Optional, List, Any, Dict
 from mem0 import Memory
@@ -53,7 +54,6 @@ DEFAULT_CONFIG = {
         }
     },
 }
-
 # 初始化Memory实例
 MEMORY_INSTANCE = Memory.from_config(DEFAULT_CONFIG)
 
@@ -62,6 +62,15 @@ app = FastAPI(
     description="这是一个临时的测试页面，有待后期开发",
     version="1.0.0",
 )
+
+# 挂载前端静态文件
+app.mount("/static", StaticFiles(directory="frontend/dist"), name="static")
+
+@app.get("/app", include_in_schema=False)
+async def serve_app():
+    """Serve the frontend application."""
+    return FileResponse("frontend/dist/index.html")
+
 
 
 class Message(BaseModel):

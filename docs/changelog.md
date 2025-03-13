@@ -1,5 +1,13 @@
 # 更新日志
 
+## 2025-03-13
+
+### morethan987
+
+- 官方更新：enhance Azure AI Search Integration with Binary Quantization, Pre/Post Filter Options, and user agent header
+
+- 更新服务器主文件：直接访问网址将会进入聊天界面
+
 ## 2025-03-12
 
 ### morethan987
