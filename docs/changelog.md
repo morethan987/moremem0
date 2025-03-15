@@ -6,6 +6,8 @@
 
 - 官方更新：由于tools参数已经被废弃了，因此移除了所有LLM类中的tools参数；同步更新测试文件
 
+- 官方更新：Added Custom Categories in Mem0-TS
+
 ## 2025-03-13
 
 ### morethan987
