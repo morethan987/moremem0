@@ -8,6 +8,8 @@
 
 - 官方更新：Added Custom Categories in Mem0-TS
 
+- 官方更新：更新demo
+
 ## 2025-03-13
 
 ### morethan987
