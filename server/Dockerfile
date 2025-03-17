@@ -15,6 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY pyproject.toml /app/
 COPY README.md /app/
 COPY mem0 /app/mem0
+COPY robots /app/robots/
 
 # 安装本地包
 WORKDIR /app

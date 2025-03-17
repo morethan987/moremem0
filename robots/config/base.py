@@ -1,0 +1,2 @@
+class BaseBot:
+    pass
