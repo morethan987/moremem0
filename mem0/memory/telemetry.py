@@ -8,7 +8,7 @@ from posthog import Posthog
 import mem0
 from mem0.memory.setup import get_user_id, setup_config
 
-MEM0_TELEMETRY = os.environ.get("MEM0_TELEMETRY", "True")
+MEM0_TELEMETRY = os.environ.get("MEM0_TELEMETRY", "False")
 
 if isinstance(MEM0_TELEMETRY, str):
     MEM0_TELEMETRY = MEM0_TELEMETRY.lower() in ("true", "1", "yes")
