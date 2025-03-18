@@ -74,11 +74,25 @@ class Memory(MemoryBase):
     @classmethod
     def from_config(cls, config_dict: Dict[str, Any]):
         try:
+            config = cls._process_config(config_dict)
             config = MemoryConfig(**config_dict)
         except ValidationError as e:
             logger.error(f"Configuration validation error: {e}\n")
             raise
         return cls(config)
+    
+    @staticmethod
+    def _process_config(config_dict: Dict[str, Any]) -> Dict[str, Any]:
+        if "graph_store" in config_dict:
+            if "vector_store" not in config_dict and "embedder" in config_dict:
+                config_dict["vector_store"] = {}
+                config_dict["vector_store"]["config"] = {}
+                config_dict["vector_store"]["config"]["embedding_model_dims"] = config_dict["embedder"]["config"]["embedding_dims"]
+        try:
+            return config_dict
+        except ValidationError as e:
+            logger.error(f"Configuration validation error: {e}")
+            raise
 
     def add(self, messages: Union[str, List[Dict[str, str]]], **kwargs) -> Dict[str, Any]:
         """
