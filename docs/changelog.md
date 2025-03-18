@@ -6,7 +6,9 @@
 
 - 进一步阅读QQBot的API文档，写了简单的代码，但是写的实在是太简略了；TODO 尝试gocqhttp
 
-- 官方更新：修复neo4j参数传递错误；
+- 官方更新：修复neo4j参数传递错误
+
+- 官方更新：update Azure AI Search Config
 
 ## 2025-03-17
 
