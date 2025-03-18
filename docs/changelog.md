@@ -10,6 +10,8 @@
 
 - 官方更新：update Azure AI Search Config
 
+- 同步官方更新：新增infer参数
+
 ## 2025-03-17
 
 ### morethan987

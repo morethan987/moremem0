@@ -106,6 +106,7 @@ class Memory(MemoryBase):
                 run_id (str, optional): ID of the run creating the memory. Defaults to None.
                 metadata (dict, optional): Metadata to store with the memory. Defaults to None.
                 filters (dict, optional): Filters to apply to the search for pre-existing memories. Defaults to None.
+                infer (boolean): Whether to infer the memories. Defaults to True.
                 prompt (str, optional): Prompt to use for memory deduction. Defaults to None.
                 graph_prompt (str, optional): Prompt to use for graph memory deduction. Defaults to None.
                 includes (str, optional): Prompt to include specified info.
@@ -134,6 +135,8 @@ class Memory(MemoryBase):
             filters["agent_id"] = metadata["agent_id"] = kwargs.get("agent_id")
         if kwargs.get("run_id"):
             filters["run_id"] = metadata["run_id"] = kwargs.get("run_id")
+
+        infer = kwargs.get("infer") if kwargs.get("infer") else True
         
         includes_dic = kwargs.get("includes") or {}
         excludes_dic = kwargs.get("excludes") or {}
@@ -168,7 +171,7 @@ class Memory(MemoryBase):
             messages = parse_vision_messages(messages)
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            future1 = executor.submit(self._add_to_vector_store, messages, metadata, filters, custom_categories, prompt=kwargs.get("prompt"), includes=includes_dic["vector"], excludes=excludes_dic["vector"])
+            future1 = executor.submit(self._add_to_vector_store, messages, metadata, filters, infer, custom_categories, prompt=kwargs.get("prompt"), includes=includes_dic["vector"], excludes=excludes_dic["vector"])
             
             future2 = executor.submit(self._add_to_graph, messages, filters, custom_node_types=custom_node_types, custom_relations=custom_relations, graph_prompt=kwargs.get("graph_prompt"), includes=includes_dic["graph"], excludes=excludes_dic["graph"])
 
@@ -210,7 +213,16 @@ class Memory(MemoryBase):
 
         return {k: v for k, v in kwargs.items() if v is not None}
 
-    def _add_to_vector_store(self, messages, metadata, filters, custom_categories=None, prompt=None, includes=None, excludes=None):
+    def _add_to_vector_store(self, messages, metadata, filters, infer, custom_categories=None, prompt=None, includes=None, excludes=None):
+        if not infer:
+            returned_memories = []
+            for message in messages:
+                if message["role"] != "system":
+                    message_embeddings = self.embedding_model.embed(message["content"], "add")
+                    memory_id = self._create_memory(message["content"], message_embeddings, metadata, categories=[])
+                    returned_memories.append({"id": memory_id, "memory": message["content"], "event": "ADD"})
+            return returned_memories
+
         parsed_messages = parse_messages(messages)
 
         custom_prompt = prompt if prompt else self.custom_prompt
@@ -266,40 +278,7 @@ class Memory(MemoryBase):
             logging.error(f"Error in new_memories_with_actions: {e}")
             new_memories_with_actions = []
 
-        # 从原始响应中解析出记忆
-        try:
-            new_memories_with_actions = remove_code_blocks(new_memories_with_actions)
-            new_memories_with_actions = json.loads(new_memories_with_actions)
-        except Exception as e:
-            logging.error(f"Invalid JSON response: {e}")
-            new_memories_with_actions = []
-        
-        # 过滤出ADD类型的记忆
-        add_memories = [mem for mem in new_memories_with_actions["memory"] if mem["event"] == "ADD"]
-        
-        if add_memories:
-            # 只对ADD类型记忆生成categories标签
-            categories_generating_prompt = get_create_categories_prompt({"memory": add_memories}, custom_categories)
-            memories_with_categories = self.llm.generate_response(
-                messages=[{"role": "user", "content": categories_generating_prompt}],
-                response_format={"type": "json_object"},
-            )
-            try:
-                memories_with_categories = remove_code_blocks(memories_with_categories)
-                memories_with_categories = json.loads(memories_with_categories)
-            except Exception as e:
-                logging.error(f"Invalid JSON response: {e}")
-                memories_with_categories = []
-            
-            # 将categories合并回原始记忆中
-            add_memories_dict = {mem["text"]: mem for mem in add_memories}
-            for mem in memories_with_categories["memory"]:
-                if mem["text"] in add_memories_dict:
-                    add_memories_dict[mem["text"]]["categories"] = mem.get("categories", "")
-            
-            # 将非ADD类型记忆添加回结果中
-            non_add_memories = [mem for mem in new_memories_with_actions["memory"] if mem["event"] != "ADD"]
-            new_memories_with_actions["memory"] = add_memories + non_add_memories
+        new_memories_with_actions = self._create_categories(new_memories_with_actions, custom_categories)
 
         returned_memories = []
         logger.debug(f"the final new_memories_with_actions: {new_memories_with_actions}\n")
@@ -679,6 +658,55 @@ class Memory(MemoryBase):
         """
         capture_event("mem0.history", self, {"memory_id": memory_id})
         return self.db.get_history(memory_id)
+
+    def _create_categories(self, new_memories_with_actions, custom_categories):
+        """
+        为记忆创建categories标签。
+        
+        Args:
+            new_memories_with_actions: 包含记忆和动作的字典
+            custom_categories: 自定义分类标签
+            
+        Returns:
+            处理后的new_memories_with_actions字典
+        """
+        # 从原始响应中解析出记忆
+        try:
+            new_memories_with_actions = remove_code_blocks(new_memories_with_actions)
+            new_memories_with_actions = json.loads(new_memories_with_actions)
+        except Exception as e:
+            logging.error(f"Invalid JSON response: {e}")
+            new_memories_with_actions = []
+        
+        # 过滤出ADD类型的记忆
+        add_memories = [mem for mem in new_memories_with_actions["memory"] if mem["event"] == "ADD"]
+        
+        if add_memories:
+            # 只对ADD类型记忆生成categories标签
+            categories_generating_prompt = get_create_categories_prompt({"memory": add_memories}, custom_categories)
+            memories_with_categories = self.llm.generate_response(
+                messages=[{"role": "user", "content": categories_generating_prompt}],
+                response_format={"type": "json_object"},
+            )
+            try:
+                memories_with_categories = remove_code_blocks(memories_with_categories)
+                memories_with_categories = json.loads(memories_with_categories)
+            except Exception as e:
+                logging.error(f"Invalid JSON response: {e}")
+                memories_with_categories = []
+            
+            # 将categories合并回原始记忆中
+            add_memories_dict = {mem["text"]: mem for mem in add_memories}
+            for mem in memories_with_categories["memory"]:
+                if mem["text"] in add_memories_dict:
+                    add_memories_dict[mem["text"]]["categories"] = mem.get("categories", "")
+            
+            # 将非ADD类型记忆添加回结果中
+            non_add_memories = [mem for mem in new_memories_with_actions["memory"] if mem["event"] != "ADD"]
+            new_memories_with_actions["memory"] = add_memories + non_add_memories
+            
+        return new_memories_with_actions
+
 
     def _create_memory(self, data, existing_embeddings, categories, metadata=None):
         logger.info(f"Creating memory with {data=}\n")
