@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: server/Dockerfile
+    depends_on:
+      - neo4j
+      - qdrant
+    environment:
+      - NEO4J_HOST=neo4j
+      - NEO4J_PORT=7687
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+    volumes:
+      - ..:/app
+    networks:
+      - mem0-network
+
+  neo4j:
+    image: neo4j:latest
+    environment:
+      - NEO4J_AUTH=neo4j/mo123456789
+    ports:
+      - "7474:7474"  # HTTP
+      - "7687:7687"  # Bolt
+    volumes:
+      - E:/neo4j/data:/data
+      - E:/neo4j/logs:/logs
+      - E:/neo4j/conf:/var/lib/neo4j/conf
+      - E:/neo4j/import:/var/lib/neo4j/import
+      - E:/neo4j/plugins:/var/lib/neo4j/plugins
+    networks:
+      - mem0-network
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"  # REST API
+      - "6334:6334"  # gRPC
+    volumes:
+      - E:\Qdrant:/qdrant/storage:z
+    networks:
+      - mem0-network
+
+networks:
+  mem0-network:
+    driver: bridge

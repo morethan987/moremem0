@@ -63,15 +63,6 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# 挂载前端静态文件
-app.mount("/static", StaticFiles(directory="frontend/dist"), name="static")
-
-@app.get("/app", include_in_schema=False)
-async def serve_app():
-    """Serve the frontend application."""
-    return FileResponse("frontend/dist/index.html")
-
-
 
 class Message(BaseModel):
     role: str = Field(..., description="Role of the message (user or assistant).")
@@ -94,7 +85,7 @@ class SearchRequest(BaseModel):
     filters: Optional[Dict] = None
 
 
-@app.post("/configure", summary="Configure Mem0")
+@app.post("/api/configure", summary="Configure Mem0")
 def set_config(config: Dict[str, Any]):
     """Set memory configuration."""
     global MEMORY_INSTANCE
@@ -123,7 +114,7 @@ def set_config(config: Dict[str, Any]):
     return {"message": "Configuration set successfully"}
 
 
-@app.post("/memories", summary="Create memories")
+@app.post("/api/memories", summary="Create memories")
 def add_memory(memory_create: MemoryCreate):
     """Store new memories."""
     if not any([memory_create.user_id, memory_create.agent_id, memory_create.run_id]):
@@ -139,7 +130,7 @@ def add_memory(memory_create: MemoryCreate):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/memories", summary="Get memories")
+@app.get("/api/memories", summary="Get memories")
 def get_all_memories(
     user_id: Optional[str] = None,
     run_id: Optional[str] = None,
@@ -155,7 +146,7 @@ def get_all_memories(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/memories/{memory_id}", summary="Get a memory")
+@app.get("/api/memories/{memory_id}", summary="Get a memory")
 def get_memory(memory_id: str):
     """Retrieve a specific memory by ID."""
     try:
@@ -164,7 +155,7 @@ def get_memory(memory_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/search", summary="Search memories")
+@app.post("/api/search", summary="Search memories")
 def search_memories(search_req: SearchRequest):
     """Search for memories based on a query."""
     try:
@@ -174,7 +165,7 @@ def search_memories(search_req: SearchRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.put("/memories/{memory_id}", summary="Update a memory")
+@app.put("/api/memories/{memory_id}", summary="Update a memory")
 def update_memory(memory_id: str, updated_memory: Dict[str, Any]):
     """Update an existing memory."""
     try:
@@ -183,7 +174,7 @@ def update_memory(memory_id: str, updated_memory: Dict[str, Any]):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/memories/{memory_id}/history", summary="Get memory history")
+@app.get("/api/memories/{memory_id}/history", summary="Get memory history")
 def memory_history(memory_id: str):
     """Retrieve memory history."""
     try:
@@ -192,7 +183,7 @@ def memory_history(memory_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.delete("/memories/{memory_id}", summary="Delete a memory")
+@app.delete("/api/memories/{memory_id}", summary="Delete a memory")
 def delete_memory(memory_id: str):
     """Delete a specific memory by ID."""
     try:
@@ -202,7 +193,7 @@ def delete_memory(memory_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.delete("/memories", summary="Delete all memories")
+@app.delete("/api/memories", summary="Delete all memories")
 def delete_all_memories(
     user_id: Optional[str] = None,
     run_id: Optional[str] = None,
@@ -219,7 +210,7 @@ def delete_all_memories(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/reset", summary="Reset all memories")
+@app.post("/api/reset", summary="Reset all memories")
 def reset_memory():
     """Completely reset stored memories."""
     try:
@@ -227,9 +218,3 @@ def reset_memory():
         return {"message": "All memories reset"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.get("/", summary="Redirect to the documentation", include_in_schema=False)
-def home():
-    """Redirect to the documentation."""
-    return RedirectResponse(url='/docs')

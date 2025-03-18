@@ -15,10 +15,11 @@ export default defineConfig({
   host: '0.0.0.0',
   proxy: {
     '/api': {
-      target: 'https://moremem.xyz',
-      changeOrigin: true,
-      rewrite: (path) => path.replace(/^\/api/, ""),
-      secure: true
+      target: '/',
+      changeOrigin: false,
+      rewrite: (path) => path,
+      secure: true,
+      ws: true
     }
   }
 }

@@ -1,6 +1,17 @@
+# 使用前请重命名为 docker-compose.yml
 version: '3'
 
 services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    networks:
+      - moremem-network
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
   app:
     build:
       context: ..
@@ -16,48 +27,71 @@ services:
     volumes:
       - ..:/app
     networks:
-      - mem0-network
+      - moremem-network
 
   nginx:
-    image: nginx:latest
-    ports:
-      - "80:80"
-      - "443:443"
+      image: nginx:latest
+      ports:
+          - "80:80"
+          - "443:443"
+      volumes:
+          - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+          - ./certbot/conf:/etc/letsencrypt:ro
+          - ./certbot/www:/var/www/certbot
+          - ./frontend/dist:/app/server/frontend/dist:ro  # 添加前端构建文件的挂载
+      depends_on:
+        - app
+      networks:
+        - moremem-network
+      environment:
+        - NGINX_HOST=moremem.xyz
+        - NGINX_PORT=443
+        - HTTPS=true
+      extra_hosts:
+        - "moremem.xyz:127.0.0.1"
+      command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+  
+  certbot:
+    image: certbot/certbot:latest
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./certbot/conf:/etc/letsencrypt:ro
-      - ./certbot/www:/var/www/certbot:ro
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
     depends_on:
-      - app
-    networks:
-      - mem0-network
-    environment:
-      - NGINX_HOST=moremem.xyz
-      - NGINX_PORT=80
-      
-  # certbot:
+      - nginx
+
+  # 初始化证书
+  # certbot-init:
   #   image: certbot/certbot:latest
   #   volumes:
   #     - ./certbot/conf:/etc/letsencrypt
   #     - ./certbot/www:/var/www/certbot
   #   depends_on:
   #     - nginx
+  #   command: >
+  #     certonly --webroot
+  #     --webroot-path /var/www/certbot
+  #     --email 2404385626@qq.com
+  #     --agree-tos
+  #     --no-eff-email
+  #     -d moremem.xyz
+  #     -d www.moremem.xyz
 
   neo4j:
-    image: neo4j:5.26.2
+    image: neo4j:latest
     environment:
       - NEO4J_AUTH=neo4j/mo123456789
     ports:
       - "7474:7474"  # HTTP
       - "7687:7687"  # Bolt
     volumes:
-      - E:/neo4j/data:/data
-      - E:/neo4j/logs:/logs
-      - E:/neo4j/conf:/var/lib/neo4j/conf
-      - E:/neo4j/import:/var/lib/neo4j/import
-      - E:/neo4j/plugins:/var/lib/neo4j/plugins
+      - ~/volume/neo4j/data:/data
+      - ~/volume/neo4j/logs:/logs
+      - ~/volume/neo4j/conf:/var/lib/neo4j/conf
+      - ~/volume/neo4j/import:/var/lib/neo4j/import
+      - ~/volume/neo4j/plugins:/var/lib/neo4j/plugins
     networks:
-      - mem0-network
+      - moremem-network
 
   qdrant:
     image: qdrant/qdrant:latest
@@ -65,10 +99,10 @@ services:
       - "6333:6333"  # REST API
       - "6334:6334"  # gRPC
     volumes:
-      - E:\Qdrant:/qdrant/storage:z
+      - ~/volume/qdrant:/qdrant/storage:z
     networks:
-      - mem0-network
+      - moremem-network
 
 networks:
-  mem0-network:
+  moremem-network:
     driver: bridge
