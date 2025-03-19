@@ -21,7 +21,7 @@ class MemoryItem(BaseModel):
     score: Optional[float] = Field(None, description="The score associated with the text data")
     created_at: Optional[str] = Field(None, description="The timestamp when the memory was created")
     updated_at: Optional[str] = Field(None, description="The timestamp when the memory was updated")
-    categories: List[str] = Field([], description="The relative categories of the memory")
+    categories: Optional[List[str]] = Field([], description="The relative categories of the memory") # TODO:ERORR 这个地方有问题，Qdrant调用的search接口改了之后出现了奇怪的返回
 
 
 class MemoryConfig(BaseModel):

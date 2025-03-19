@@ -1,6 +1,6 @@
 import os
 import requests
-from typing import Optional
+from typing import Optional, Literal
 
 from mem0.configs.embeddings.base import BaseEmbedderConfig
 from mem0.embeddings.base import EmbeddingBase
@@ -16,7 +16,7 @@ class SiliconFlowEmbedding(EmbeddingBase):
         self.api_key = self.config.api_key or os.getenv("SILICONFLOW_API_KEY")
         self.base_url = self.config.siliconflow_base_url or os.getenv("SILICONFLOW_API_BASE") or "https://api.siliconflow.cn/v1/embeddings"
 
-    def embed(self, text):
+    def embed(self, text, memory_action: Optional[Literal["add", "search", "update"]] = None):
         """
         Get the embedding for the given text using SiliconFlow.
 

@@ -280,5 +280,5 @@ Now please begin your work:
 
 {add_memories}
 
-Attention: Do not return anything except JSON.
+Attention: Do not return anything except JSON. You should return an array even "categories" only has one element.
 """

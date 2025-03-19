@@ -98,7 +98,7 @@ const searchInternalMemories = async (query: string, config?: Mem0Config, top_k:
         body: JSON.stringify({ query, filters, top_k, version: "v2", ...org_project_filters }),
         validate: false,
     };
-    const response  = await fetch('https://moremem.xyz/api/search/', options);
+    const response  = await fetch('/api/search/', options);
     const data =  await response.json();
     return data;
 }
@@ -124,7 +124,7 @@ const updateMemories = async (messages: Array<Message>, config?: Mem0Config)=>{
         validate: false,
     };
 
-    const response  = await fetch('https://moremem.xyz/api/memories/', options);
+    const response  = await fetch('/api/memories/', options);
     const data =  await response.json();
     return data;
 }

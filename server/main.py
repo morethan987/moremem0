@@ -39,7 +39,7 @@ DEFAULT_CONFIG = {
     "llm": {
         "provider": "aliyun",
         "config": {
-            "model": "qwen-max-latest",
+            "model": "qwen-max-2025-01-25",
             "temperature": 0.0,
             "top_p": 0.1,
             "max_tokens": 8000,
