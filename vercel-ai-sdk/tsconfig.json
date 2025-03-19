@@ -17,7 +17,7 @@
       "types": ["@types/node", "jest"],
       "jsx": "react-jsx",
       "lib": ["dom", "ES2021"],
-      "module": "CommonJS",
+      "module": "ESNext",
       "target": "ES2018",
       "stripInternal": true,
       "paths": {
