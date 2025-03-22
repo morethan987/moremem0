@@ -1,62 +1,37 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg id="_图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 894 840.2">
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="24" height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  class="lucide lucide-notebook-pen">
+
   <defs>
-    <style>
-      .cls-1 {
-        fill: #0871ff;
-      }
-
-      .cls-1, .cls-2, .cls-3, .cls-4 {
-        stroke-width: 0px;
-      }
-
-      .cls-2 {
-        fill: #0972ff;
-      }
-
-      .cls-3 {
-        fill: #2dabff;
-      }
-
-      .cls-4 {
-        fill: #37adff;
-      }
-    </style>
+    <!-- 定义线性渐变：可能仅用于主要形状 -->
+    <linearGradient id="oceanGradient" x1="0%" y1="0%" x2="100%" y2="100%" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#00d4fd"/>
+      <!-- <stop offset="100%" stop-color="#005bea"/> -->
+      <stop offset="100%" stop-color="#0061FC"/>
+    </linearGradient>
   </defs>
-  <g>
-    <rect class="cls-4" y="108.5" width="70" height="70"/>
-    <rect class="cls-4" x="824" y="108.5" width="70" height="70"/>
-    <rect class="cls-1" x="70" y="66.5" width="754" height="188"/>
-  </g>
-  <g>
-    <g>
-      <rect class="cls-4" x="201.83" width="80" height="137"/>
-      <circle class="cls-4" cx="241.83" cy="137" r="40"/>
-    </g>
-    <g>
-      <rect class="cls-4" x="612.17" width="80" height="137"/>
-      <circle class="cls-4" cx="652.17" cy="137" r="40"/>
-    </g>
-  </g>
-  <rect class="cls-2" x="5" y="178.5" width="65" height="590"/>
-  <rect class="cls-2" x="824" y="178.5" width="65" height="590"/>
-  <rect class="cls-2" x="70" y="768.88" width="754" height="71.32"/>
-  <g>
-    <g>
-      <rect class="cls-3" x="504" y="359.5" width="208.61" height="50"/>
-      <rect class="cls-3" x="504" y="490" width="208.61" height="50"/>
-      <rect class="cls-3" x="504" y="620.5" width="208.61" height="50"/>
-    </g>
-    <rect class="cls-3" x="462.61" y="409.5" width="41.39" height="80.5"/>
-    <rect class="cls-3" x="712.61" y="540" width="41.39" height="80.5"/>
-  </g>
-  <g>
-    <g>
-      <rect class="cls-3" x="181.39" y="359.5" width="208.61" height="50"/>
-      <rect class="cls-3" x="181.39" y="490" width="208.61" height="50"/>
-      <rect class="cls-3" x="181.39" y="620.5" width="208.61" height="50"/>
-    </g>
-    <rect class="cls-3" x="140" y="409.5" width="41.39" height="80.5"/>
-    <rect class="cls-3" x="140" y="540" width="41.39" height="80.5"/>
-  </g>
+
+  <!-- 主体形状：Notebook外框 + 笔图标 -->
+  <path
+    d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4" 
+    stroke="url(#oceanGradient)" 
+    fill="none"
+  />
+  <path 
+    d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z" 
+    stroke="url(#oceanGradient)" 
+    fill="none"
+  />
+
+  <path d="M2 6h4" stroke="url(#oceanGradient)" stroke-width="2" fill="none"/>
+  <path d="M2 10h4" stroke="url(#oceanGradient)" stroke-width="2" fill="none"/>
+  <path d="M2 14h4" stroke="url(#oceanGradient)" stroke-width="2" fill="none"/>
+  <path d="M2 18h4" stroke="url(#oceanGradient)" stroke-width="2" fill="none"/>
+
 </svg>

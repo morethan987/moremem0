@@ -12,6 +12,8 @@
 
 - 使用git跟踪插件记忆库memory-bank
 
+- 更换网站logo
+
 ## 2025-03-19
 
 ### morethan987
