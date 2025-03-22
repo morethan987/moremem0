@@ -193,4 +193,3 @@ certbot/
 # RooCode
 .*
 !.env.example
-memory-bank

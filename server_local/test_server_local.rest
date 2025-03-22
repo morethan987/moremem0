@@ -2,16 +2,16 @@
 @user_id = morethan
 
 ### 获取所有记忆
-GET https://moremem.xyz/api/memories?user_id={{user_id}}
+GET http://localhost:8000/api/memories?user_id={{user_id}}
 
 ### 删除用户的所有记忆
-DELETE https://moremem.xyz/api/memories?user_id={{user_id}}
+DELETE http://localhost:8000/api/memories?user_id={{user_id}}
 
 ### 获取文档
-GET https://moremem.xyz/docs
+GET http://localhost:8000/docs
 
 ### 配置内存实例
-POST https://moremem.xyz/api/configure
+POST http://localhost:8000/api/configure
 Content-Type: application/json
 
 {
@@ -53,7 +53,7 @@ Content-Type: application/json
 }
 
 ### 添加记忆
-POST https://moremem.xyz/api/memories
+POST http://localhost:8000/api/memories
 Content-Type: application/json
 
 {
@@ -67,7 +67,7 @@ Content-Type: application/json
 }
 
 ### 根据关键词搜索记忆
-POST https://moremem.xyz/api/search
+POST http://localhost:8000/api/search
 Content-Type: application/json
 
 {
@@ -76,10 +76,10 @@ Content-Type: application/json
 }
 
 ### 获取指定记忆的历史
-GET https://moremem.xyz/api/memories/{{memory_id}}/history
+GET http://localhost:8000/api/memories/{{memory_id}}/history
 
 ### 更新指定记忆
-PUT https://moremem.xyz/api/memories/{{memory_id}}
+PUT http://localhost:8000/api/memories/{{memory_id}}
 Content-Type: application/json
 
 {
@@ -87,7 +87,7 @@ Content-Type: application/json
 }
 
 ### 删除指定记忆
-DELETE https://moremem.xyz/api/memories/{{memory_id}}
+DELETE http://localhost:8000/api/memories/{{memory_id}}
 
 ### 重置所有记忆
-POST https://moremem.xyz/api/reset
+POST http://localhost:8000/api/reset

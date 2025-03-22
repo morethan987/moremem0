@@ -4,7 +4,7 @@ services:
   app:
     build:
       context: ..
-      dockerfile: server/Dockerfile
+      dockerfile: server_local/Dockerfile
     depends_on:
       - neo4j
       - qdrant
@@ -15,8 +15,10 @@ services:
       - QDRANT_PORT=6333
     volumes:
       - ..:/app
+    ports:
+      - "8000:8000"
     networks:
-      - mem0-network
+      - moremem0-network
 
   neo4j:
     image: neo4j:latest
@@ -32,7 +34,7 @@ services:
       - E:/neo4j/import:/var/lib/neo4j/import
       - E:/neo4j/plugins:/var/lib/neo4j/plugins
     networks:
-      - mem0-network
+      - moremem0-network
 
   qdrant:
     image: qdrant/qdrant:latest
@@ -42,8 +44,8 @@ services:
     volumes:
       - E:\Qdrant:/qdrant/storage:z
     networks:
-      - mem0-network
+      - moremem0-network
 
 networks:
-  mem0-network:
+  moremem0-network:
     driver: bridge

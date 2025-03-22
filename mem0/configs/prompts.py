@@ -239,9 +239,9 @@ DEFAULT_CATEGORIES = """
 """
 
 def get_create_categories_prompt(add_memories, custom_categories=None):
-    return f"""You are a classification expert with expertise in JSON format. You will receive one or more memory entries, and your task is to insert classification tags into them according to JSON syntax.
+    return f"""You are a classification expert with expertise in JSON format. You will receive one or more memory entries, and your task is to create category tags for them.
 
-Please choose classification tags **from the following list**. If necessary, you may insert multiple tags:
+Please choose category tags **from the following list**. If necessary, you may insert multiple tags:
 
 {custom_categories if custom_categories else DEFAULT_CATEGORIES}
 
@@ -280,5 +280,5 @@ Now please begin your work:
 
 {add_memories}
 
-Attention: Do not return anything except JSON. You should return an array even "categories" only has one element.
+Attention: Do not return anything except JSON.
 """
