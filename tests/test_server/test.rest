@@ -1,4 +1,4 @@
-@memory_id = your-memory-id-here
+@memory_id = id
 @user_id = morethan
 
 ### 获取所有记忆

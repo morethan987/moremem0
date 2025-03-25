@@ -48,7 +48,7 @@ const Memories = (props: { isMemoriesExpanded: boolean }) => {
     >
       <div className="px-4 py-[22px] border-b">
         <span className="font-semibold">
-          Relevant Memories ({memories.length})
+          相关记忆信息 ({memories.length})
         </span>
       </div>
       {memories.length === 0 && (
@@ -57,9 +57,9 @@ const Memories = (props: { isMemoriesExpanded: boolean }) => {
           animate={{ opacity: 1 }}
           className="p-4 text-center"
         >
-          <span className="font-semibold">No relevant memories found.</span>
+          <span className="font-semibold">没有相关记忆</span>
           <br />
-          Only the relevant memories will be displayed here.
+          只有相关的记忆会被展示出来
         </motion.div>
       )}
       <ScrollArea className="flex-1 p-4">

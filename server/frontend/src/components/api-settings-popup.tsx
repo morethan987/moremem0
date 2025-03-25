@@ -10,7 +10,7 @@ export default function ApiSettingsPopup(props: { isOpen: boolean, setIsOpen: Di
   const {isOpen, setIsOpen} = props
   const [mem0ApiKey, setMem0ApiKey] = useState('')
   const [providerApiKey, setProviderApiKey] = useState('')
-  const [provider, setProvider] = useState('OpenAI')
+  const [provider, setProvider] = useState('DeepSeek')
   const { selectorHandler, selectedOpenAIKey, selectedMem0Key, selectedProvider } = useContext(GlobalContext);
 
   const handleSave = () => {
@@ -30,7 +30,7 @@ export default function ApiSettingsPopup(props: { isOpen: boolean, setIsOpen: Di
       setProvider(selectedProvider);
     }
   }, [selectedOpenAIKey, selectedMem0Key, selectedProvider]);
-  
+
 
 
   return (
@@ -41,17 +41,6 @@ export default function ApiSettingsPopup(props: { isOpen: boolean, setIsOpen: Di
             <DialogTitle>API Configuration Settings</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="mem0-api-key" className="text-right">
-                Mem0 API Key
-              </Label>
-              <Input
-                id="mem0-api-key"
-                value={mem0ApiKey}
-                onChange={(e) => setMem0ApiKey(e.target.value)}
-                className="col-span-3 rounded-3xl"
-              />
-            </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="provider-api-key" className="text-right">
                 Provider API Key
@@ -72,12 +61,12 @@ export default function ApiSettingsPopup(props: { isOpen: boolean, setIsOpen: Di
                   <SelectValue placeholder="Select provider" />
                 </SelectTrigger>
                 <SelectContent className='rounded-3xl'>
+                  <SelectItem value="deepseek" className='rounded-3xl'>DeepSeek</SelectItem>
+                  <SelectItem value="aliyun" className='rounded-3xl'>Aliyun</SelectItem>
                   <SelectItem value="openai" className='rounded-3xl'>OpenAI</SelectItem>
                   <SelectItem value="anthropic" className='rounded-3xl'>Anthropic</SelectItem>
                   <SelectItem value="cohere" className='rounded-3xl'>Cohere</SelectItem>
                   <SelectItem value="groq" className='rounded-3xl'>Groq</SelectItem>
-                  <SelectItem value="deepseek" className='rounded-3xl'>DeepSeek</SelectItem>
-                  <SelectItem value="aliyun" className='rounded-3xl'>Aliyun</SelectItem>
                 </SelectContent>
               </Select>
             </div>

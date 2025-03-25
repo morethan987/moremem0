@@ -15,7 +15,7 @@ interface UseAuthReturn {
 export const useAuth = (): UseAuthReturn => {
   const [mem0ApiKey, setMem0ApiKey] = useState<string>('');
   const [openaiApiKey, setOpenaiApiKey] = useState<string>('');
-  const [provider, setProvider] = useState<Provider>('openai');
+  const [provider, setProvider] = useState<Provider>('deepseek');
   const [user, setUser] = useState<string>('');
 
   useEffect(() => {

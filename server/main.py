@@ -108,7 +108,7 @@ def set_config(config: Dict[str, Any]):
     # 传递环境变量
     merged_config["vector_store"]["config"]["host"] = QDRANT_HOST
     merged_config["vector_store"]["config"]["port"] = int(QDRANT_PORT)
-    merged_config["graph_store"]["config"]["url"] = f"neo4j://{NEO4J_HOST}:{NEO4J_PORT}"
+    # merged_config["graph_store"]["config"]["url"] = f"neo4j://{NEO4J_HOST}:{NEO4J_PORT}"
     
     MEMORY_INSTANCE = Memory.from_config(merged_config)
     return {"message": "Configuration set successfully"}

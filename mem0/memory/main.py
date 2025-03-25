@@ -546,7 +546,7 @@ class Memory(MemoryBase):
 
     def _search_vector_store(self, query, filters, limit):
         embeddings = self.embedding_model.embed(query, "search")
-        memories = self.vector_store.search(query=embeddings, limit=limit, filters=filters)
+        memories = self.vector_store.search(query=embeddings, limit=limit, filters=filters) # TODO 参数filter需要由AI产生
 
         excluded_keys = {
             "user_id",
