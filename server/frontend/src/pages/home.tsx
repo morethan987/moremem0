@@ -25,6 +25,12 @@ export default function Home() {
 
           {/* Input Area */}
           <InputArea />
+
+          {/* Footer */}
+          <div className="flex items-center justify-center py-4 bg-background">
+            <img src="/备案图标.png" alt="公安备案图标" className="h-5 mr-2" />
+            <a href="https://beian.mps.gov.cn/#/query/webSearch?code=50010302505366" rel="noreferrer" target="_blank">渝公网安备50010302505366号</a>
+          </div>
         </div>
 
         {/* Chevron Toggle */}
