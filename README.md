@@ -1,8 +1,9 @@
-This is a modified version of mem0.
+# MoreMem0
 
-moremem0是一个mem0的魔改版本，更加适应日程管理项目的体质。官方参考文档见：[Guide - Mem0.ai](https://docs.qq.com/aio/DTXFOaWVTa0tWV2JL?p=uXPWnMkrkZBipuFh4rclLh&client_hint=0#BssDTCwbPaVbrlDJCjpuA2)
+一个智能日程管理助手，基于Qdrant向量数据库和Neo4j图数据库，能够在对话中逐步加深对于用户的了解，能够像一位秘书一样安排繁琐的日程、规划长日程并进行子目标分解，提高执行效率的同时兼顾你的生活习惯，让舒适与自律可以兼得。
 
 ### 最新的功能
+
 **累计更新到2025-02-22**，从功能上实现了图数据库和向量数据库存储内容的可控分离，让传统的数据库设计的方法能够很好地在这个系统中执行；利用AI强大处理能力直接操控数据库的同时，也保留了传统方式访问数据库的可行性
 
 具体的更新改动建docs/changelog.md文件
